@@ -28,33 +28,227 @@ if(!empty($_SESSION['login'])){
           <a href="/eigenaar/klant_blokkeren" class="btn btn-primary admin_menu">KLANT BLOKKEREN</a>
           <a href="/eigenaar/klacht_afhandelen" class="btn btn-primary admin_menu actief">KLACHT AFHANDELEN</a>
         </div>
-    <?php
-    if(!empty($_POST)){
-      $ordernummer = $_POST['ordernummer'];
-      $onderwerp = $_POST['onderwerp'];
-      $bericht = $_POST['bericht'];
-      $vandaag = date('d-m-Y');
-      $status = 1;
-      $klant = $klantId;
+      <h1>KLACHT AFHANDELEN</h1>
+      <?php
+      if(!empty($_POST)){
+        if(!empty($_GET)){
+          if($_GET['action'] == 'reply'){
+            $stmt = DB::conn()->prepare("UPDATE `Klacht` SET `status`=2 WHERE id=?");
+            $stmt->bind_param('i', $_GET['code']);
+            $stmt->execute();
+            $stmt->close();
+            echo "<div class='succes'><b>KLACHT BEANTWOORD</b></div>";
+          }
+        }
+        klachtReactieMail($_POST['naam'], $_POST['email'], $_POST['reactie']);
+      }
 
-      $stmt = DB::conn()->prepare("INSERT INTO `Klacht`(klantid, onderwerp, bericht, orderid, datum, status) VALUES(?, ?, ?, ?, ?, ?)");
-      $stmt->bind_param('issssi', $klant, $onderwerp, $bericht, $ordernummer, $vandaag, $status);
+        if($_GET['location'] == 'in_verwachting'){
+          ?>
+          <h4><i>ALLE NOG NIET BEANTWOORDE KLACHTEN</i></h4>
+          <div class="btn-group admin">
+            <a href="?" class="btn btn-primary admin_menu">NIEUW</a>
+            <a href="?location=in_verwachting" class="btn btn-primary admin_menu actief">NOG OPEN</a>
+            <a href="?location=behandeld" class="btn btn-primary admin_menu">BEHANDELD</a>
+          </div>
+          <?php
+
+          $stmt = DB::conn()->prepare("SELECT id FROM `Klacht` WHERE status=1");
+          $stmt->execute();
+          $stmt->bind_result($id);
+          while($stmt->fetch()){
+            $ids[] = $id;
+          }
+          $stmt->close();
+
+          if(!empty($ids)){
+            foreach($ids as $i){
+              $stmt = DB::conn()->prepare("SELECT klantid, onderwerp, bericht, datum FROM `Klacht` WHERE id=?");
+              $stmt->bind_param('i', $i);
+              $stmt->execute();
+              $stmt->bind_result($klantid, $onderwerp, $bericht, $datum);
+              $stmt->fetch();
+              $stmt->close();
+
+              $stmt = DB::conn()->prepare("SELECT naam, email FROM `Persoon` WHERE id=?");
+              $stmt->bind_param('i', $klantid);
+              $stmt->execute();
+              $stmt->bind_result($naam, $email);
+              $stmt->fetch();
+              $stmt->close();
+
+              ?>
+              <div class="panel panel-default">
+                <div class="panel-heading"><h4><?php echo $naam ?></h4></div>
+                <div class="panel-body">
+                    <p>Datum: <?php echo $datum ?></p>
+                    <p>Email: <?php echo $email ?></p>
+                    <hr></hr>
+                    <p><b>Onderwerp: </b><?php echo $onderwerp ?></p>
+                    <p><b>Bericht:</b></p>
+                    <p><?php echo $bericht ?></p>
+                    <div class="filmDetail_right">
+                        <button type="submit" class="btn btn-success bestel" data-toggle="collapse" data-target="#<?php echo $i ?>">BEANTWOORD</button>
+                    </div>
+                    <br><br>
+                    <hr></hr>
+                    <div id="<?php echo $i ?>" class="collapse order_collapse">
+                      <form method="post" action="?action=reply&code=<?php echo $i?>">
+                        <input type="text" class="form-control" placeholder="reactie" name="reactie">
+                        <input type="hidden" value="<?php echo $naam ?>" name="naam">
+                        <input type="hidden" value="<?php echo $email ?>" name="email">
+                      </form>
+                    </div>
+                </div>
+              </div>
+
+              <?php
+            }
+          }else{
+            echo "<div class='warning'><b>ER ZIJN NOG GEEN KLACHTEN INGEDIEND</b></div>";
+          }
+
+        }elseif($_GET['location'] == 'behandeld'){
+          ?>
+          <h4><i>ALLE BEHANDELDE KLACHTEN</i></h4>
+          <div class="btn-group admin">
+            <a href="?" class="btn btn-primary admin_menu">NIEUW</a>
+            <a href="?location=in_verwachting" class="btn btn-primary admin_menu">NOG OPEN</a>
+            <a href="?location=behandeld" class="btn btn-primary admin_menu actief">BEHANDELD</a>
+          </div>
+          <?php
+          $stmt = DB::conn()->prepare("SELECT id FROM `Klacht` WHERE status=2");
+          $stmt->execute();
+          $stmt->bind_result($id);
+          while($stmt->fetch()){
+            $ids[] = $id;
+          }
+          $stmt->close();
+
+          if(!empty($ids)){
+            foreach($ids as $i){
+              $stmt = DB::conn()->prepare("SELECT klantid, onderwerp, bericht, datum FROM `Klacht` WHERE id=?");
+              $stmt->bind_param('i', $i);
+              $stmt->execute();
+              $stmt->bind_result($klantid, $onderwerp, $bericht, $datum);
+              $stmt->fetch();
+              $stmt->close();
+
+              $stmt = DB::conn()->prepare("SELECT naam, email FROM `Persoon` WHERE id=?");
+              $stmt->bind_param('i', $klantid);
+              $stmt->execute();
+              $stmt->bind_result($naam, $email);
+              $stmt->fetch();
+              $stmt->close();
+
+              ?>
+              <div class="panel panel-default">
+                <div class="panel-heading"><h4><?php echo $naam ?></h4></div>
+                <div class="panel-body">
+                    <p>Datum: <?php echo $datum ?></p>
+                    <p>Email: <?php echo $email ?></p>
+                    <hr></hr>
+                    <p><b>Onderwerp: </b><?php echo $onderwerp ?></p>
+                    <p><b>Bericht:</b></p>
+                    <p><?php echo $bericht ?></p>
+                    <div class="filmDetail_right">
+                        <button type="submit" class="btn btn-success bestel" data-toggle="collapse" data-target="#<?php echo $i ?>">BEANTWOORD</button>
+                    </div>
+                    <br><br>
+                    <hr></hr>
+                    <div id="<?php echo $i ?>" class="collapse order_collapse">
+                      <form method="post" action="?action=reply&code=<?php echo $i?>">
+                        <input type="text" class="form-control" placeholder="reactie" name="reactie">
+                        <input type="hidden" value="<?php echo $naam ?>" name="naam">
+                        <input type="hidden" value="<?php echo $email ?>" name="email">
+                      </form>
+                    </div>
+                </div>
+              </div>
+
+              <?php
+            }
+          }else{
+            echo "<div class='warning'><b>ER ZIJN NOG GEEN KLACHTEN BEANTWOORD</b></div>";
+          }
+        }else{
+
+      $stmt = DB::conn()->prepare("SELECT id FROM `Klacht` WHERE status=1");
       $stmt->execute();
+      $stmt->bind_result($id);
+      while($stmt->fetch()){
+        $ids[] = $id;
+      }
       $stmt->close();
-      echo "<div class='succes'><b>UW KLACHT IS INGEDIEND</b></div>";
-      klachtIndienMail($naam, $email);
-    }
-    ?>
-      <h1>KLACHT INDIENEN</h1>
-      <form method="post" enctype="multipart/form-data">
-        <input type="text" name="ordernummer" placeholder="Ordernummer (optioneel)" class="form-control" autocomplete="off">
-        <input type="text" name="onderwerp" placeholder="Onderwerp" class="form-control" autocomplete="off" required>
-        <input type="text" name="bericht" placeholder="bericht" class="form-control" autocomplete="off" required>
+      ?>
+      <h4><i>KLACHTEN DIE AFGELOPEN WEEK ZIJN BINNENGEKOMEN</i></h4>
+      <div class="btn-group admin">
+        <a href="?" class="btn btn-primary admin_menu actief">NIEUW</a>
+        <a href="?location=in_verwachting" class="btn btn-primary admin_menu">NOG OPEN</a>
+        <a href="?location=behandeld" class="btn btn-primary admin_menu">BEHANDELD</a>
+      </div>
+      <?php
+      if(!empty($ids)){
+          foreach($ids as $i){
+            $stmt = DB::conn()->prepare("SELECT klantid, onderwerp, bericht, datum FROM `Klacht` WHERE id=?");
+            $stmt->bind_param('i', $i);
+            $stmt->execute();
+            $stmt->bind_result($klantid, $onderwerp, $bericht, $datum);
+            $stmt->fetch();
+            $stmt->close();
 
-        <input type="submit" class="btn btn-succes form-knop" name="submit" value="DIEN KLACHT IN">
-      </form>
+            $stmt = DB::conn()->prepare("SELECT naam, email FROM `Persoon` WHERE id=?");
+            $stmt->bind_param('i', $klantid);
+            $stmt->execute();
+            $stmt->bind_result($naam, $email);
+            $stmt->fetch();
+            $stmt->close();
+
+            $vorigeWeek = date('d-m-Y', strtotime("-1 week"));
+            $vorigeWeek = strtotime($vorigeWeek);
+            $vandaag = date('d-m-Y', strtotime('today'));
+            $vandaag = strtotime($vandaag);
+            $date = date('d-m-Y', strtotime($datum));
+            $date = strtotime($date);
+
+            if($date >= $vorigeWeek){
+            ?>
+            <div class="panel panel-default">
+              <div class="panel-heading"><h4><?php echo $naam ?></h4></div>
+              <div class="panel-body">
+                  <p>Datum: <?php echo $datum ?></p>
+                  <p>Email: <?php echo $email ?></p>
+                  <hr></hr>
+                  <p><b>Onderwerp: </b><?php echo $onderwerp ?></p>
+                  <p><b>Bericht:</b></p>
+                  <p><?php echo $bericht ?></p>
+                  <div class="filmDetail_right">
+                      <button type="submit" class="btn btn-success bestel" data-toggle="collapse" data-target="#<?php echo $i ?>">BEANTWOORD</button>
+                  </div>
+                  <br><br>
+                  <hr></hr>
+                  <div id="<?php echo $i ?>" class="collapse order_collapse">
+                    <form method="post" action="?action=reply&code=<?php echo $i?>">
+                      <input type="text" class="form-control" placeholder="reactie" name="reactie">
+                      <input type="hidden" value="<?php echo $naam ?>" name="naam">
+                      <input type="hidden" value="<?php echo $email ?>" name="email">
+                    </form>
+                  </div>
+              </div>
+            </div>
+
+            <?php
+          }else{
+            echo "<div class='warning'><b>ER ZIJN DE AFGELOPEN TWEE WEKEN NOG GEEN KLACHTEN INGEDIEND</b></div>";
+          }
+        }
+      }else{
+        echo "<div class='warning'><b>ER ZIJN NOG GEEN KLACHTEN INGEDIEND</b></div>";
+      }
+      ?>
     </div>
   </div>
     <?php
   }
+}
 }
