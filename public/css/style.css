@@ -74,6 +74,12 @@
     height: 300px !important;
   }
 }
+a.btn.btn-primary.admin_menu {
+    width: 13%;
+}
+a.btn.btn-primary.admin_menu.klant_menu {
+    width: 50%;
+}
 select.form-control {
     color: red !important;
 }

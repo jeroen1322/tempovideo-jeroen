@@ -36,6 +36,10 @@ if(!empty($_SESSION['login'])){
   ?>
   <div class="panel panel-default">
     <div class="panel-body">
+      <div class="btn-group admin">
+        <a href="/klant/overzicht" class="btn btn-primary admin_menu klant_menu actief">OVERZICHT</a>
+        <a href="/klant/klacht_indienen" class="btn btn-primary admin_menu klant_menu">KLACHT INDIENEN</a>
+      </div>
       <?php
       if(isGeblokkeerd($klantRolId)){
         echo "<div class='blocked'><b>UW ACCOUNT IS GEBLOKKEERD</b></div>";

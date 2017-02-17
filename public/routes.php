@@ -70,6 +70,10 @@ $klein->respond('/eigenaar/klant_blokkeren', function ($request, $response, $ser
     $service->pageTitle = 'Klant blokkeren';
     $service->render(VIEWS.'/klantblokkeren.php');
 });
+$klein->respond('/eigenaar/klacht_afhandelen', function ($request, $response, $service) {
+    $service->pageTitle = 'Klacht afhandelen';
+    $service->render(VIEWS.'/eigenaar_klacht_afhandelen.php');
+});
 
 $klein->respond('/klant/overzicht', function ($request, $response, $service) {
     $service->pageTitle = 'Overzicht';

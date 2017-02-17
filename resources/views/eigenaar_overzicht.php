@@ -34,6 +34,7 @@ if(!empty($_SESSION['login'])){
           <a href="/eigenaar/film_verwijderen" class="btn btn-primary admin_menu">FILM VERWIJDEREN</a>
           <a href="/eigenaar/film_aanpassen" class="btn btn-primary admin_menu">FILM INFO BEHEREN</a>
           <a href="/eigenaar/klant_blokkeren" class="btn btn-primary admin_menu">KLANT BLOKKEREN</a>
+          <a href="/eigenaar/klacht_afhandelen" class="btn btn-primary admin_menu">KLACHT AFHANDELEN</a>
         </div>
         <h1>EIGENAAR OVERZICHT</h1>
         <div class="left">
