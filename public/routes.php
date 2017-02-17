@@ -75,7 +75,10 @@ $klein->respond('/klant/overzicht', function ($request, $response, $service) {
     $service->pageTitle = 'Overzicht';
     $service->render(VIEWS.'/klant_overzicht.php');
 });
-
+$klein->respond('/klant/klacht_indienen', function ($request, $response, $service) {
+    $service->pageTitle = 'Klacht indienen';
+    $service->render(VIEWS.'/klant_klacht.php');
+});
 
 $klein->respond('/winkelmand/afrekenen', function ($request, $response, $service) {
     $service->pageTitle = 'Afrekenen';

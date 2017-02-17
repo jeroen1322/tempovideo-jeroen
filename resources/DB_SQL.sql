@@ -104,6 +104,18 @@ id int primary key,
 omschr varchar(50)
 );
 
+create table `Klacht`(
+`id` INT auto_increment,
+`klantid` INT,
+`onderwerp` VARCHAR(255),
+`bericht` VARCHAR(255),
+`orderid` VARCHAR(25),
+`datum` VARCHAR(50),
+`status` INT,
+PRIMARY KEY(`id`),
+FOREIGN KEY (klantid) REFERENCES Persoon(`id`)
+);
+
 ALTER TABLE `Exemplaar`
 ADD FOREIGN KEY (statusid)
 REFERENCES Status(id);
