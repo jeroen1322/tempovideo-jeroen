@@ -11,7 +11,7 @@ class DB {
             $server = "localhost";
             $username = "root2";
             $passw = "root";
-            $dbname = "tempovideo";
+            $dbname = "tempovideo_jeroen";
             self::$mysqli = new mysqli($server, $username, $passw, $dbname);
         }
         return self::$mysqli;
