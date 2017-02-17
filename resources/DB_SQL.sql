@@ -1,5 +1,5 @@
-create database tempovideo;
-use tempovideo;
+createa database tempovideo_jeroen;
+use tempovideo_jeroen;
 
 create table Rol(id int primary key, 
 omschr varchar(45)
