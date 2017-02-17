@@ -26,6 +26,7 @@ if(!empty($_SESSION['login'])){
           <input type="text" name="titel" placeholder="Titel" class="form-control" autocomplete="off" required>
           <input type="text" name="acteur" placeholder="Acteurs" class="form-control" autocomplete="off" required>
           <input type="text" name="oms" placeholder="Omschrijving" class="form-control" autocomplete="off" required>
+          <input type="text" name="youtube" placeholder="YouTube video" class="form-control" autocomplete="off" required>
           <input type="text" name="genre" placeholder="Genre" class="form-control" autocomplete="off" required>
           <input type="file" name="img" placeholder="FOTO" class="form-control" accept="image/*" required>
 
@@ -49,6 +50,7 @@ if(!empty($_SESSION['login'])){
   $oms = $_POST['oms'];
   $genre = $_POST['genre'];
   $img = $_FILES['img'];
+  $youtube = $_POST['youtube'];
   $uploadName = $titel;
   $uploadName = str_replace(' ', '_', $uploadName);
   $uploadName = strtolower($uploadName);
@@ -109,8 +111,8 @@ if(!empty($_SESSION['login'])){
     }
 
     //Gegevens invoeren in Film tabel
-    $stmt = DB::conn()->prepare("INSERT INTO Film (id, titel, acteur, omschr, genre, img) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("isssss", $filmid, $uploadName, $acteur, $oms, $genre, $name);
+    $stmt = DB::conn()->prepare("INSERT INTO Film (id, titel, acteur, omschr, youtube, genre, img) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("issssss", $filmid, $uploadName, $acteur, $oms, $youtube, $genre, $name);
     $stmt->execute();
 
 

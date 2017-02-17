@@ -1,4 +1,4 @@
-createa database tempovideo_jeroen;
+create database tempovideo_jeroen;
 use tempovideo_jeroen;
 
 create table Rol(id int primary key, 
@@ -76,7 +76,8 @@ create table Film(
 id int primary key, 
 titel varchar(50), 
 acteur varchar(100), 
-omschr varchar(200)
+omschr varchar(200),
+youtube varchar(255)
 );
 
 ALTER TABLE `Exemplaar`
