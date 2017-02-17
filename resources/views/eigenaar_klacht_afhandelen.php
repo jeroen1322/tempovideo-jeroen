@@ -63,10 +63,10 @@ if(!empty($_SESSION['login'])){
 
           if(!empty($ids)){
             foreach($ids as $i){
-              $stmt = DB::conn()->prepare("SELECT klantid, onderwerp, bericht, datum FROM `Klacht` WHERE id=?");
+              $stmt = DB::conn()->prepare("SELECT klantid, onderwerp, bericht, datum, orderid FROM `Klacht` WHERE id=?");
               $stmt->bind_param('i', $i);
               $stmt->execute();
-              $stmt->bind_result($klantid, $onderwerp, $bericht, $datum);
+              $stmt->bind_result($klantid, $onderwerp, $bericht, $datum, $ordernummer);
               $stmt->fetch();
               $stmt->close();
 
@@ -83,6 +83,11 @@ if(!empty($_SESSION['login'])){
                 <div class="panel-body">
                     <p>Datum: <?php echo $datum ?></p>
                     <p>Email: <?php echo $email ?></p>
+                    <?php
+                    if(!empty($ordernummer)){
+                      echo "<p>Ordernummer: ".$ordernummer."</p>";
+                    }
+                    ?>
                     <hr></hr>
                     <p><b>Onderwerp: </b><?php echo $onderwerp ?></p>
                     <p><b>Bericht:</b></p>
@@ -127,10 +132,10 @@ if(!empty($_SESSION['login'])){
 
           if(!empty($ids)){
             foreach($ids as $i){
-              $stmt = DB::conn()->prepare("SELECT klantid, onderwerp, bericht, datum FROM `Klacht` WHERE id=?");
+              $stmt = DB::conn()->prepare("SELECT klantid, onderwerp, bericht, datum, orderid FROM `Klacht` WHERE id=?");
               $stmt->bind_param('i', $i);
               $stmt->execute();
-              $stmt->bind_result($klantid, $onderwerp, $bericht, $datum);
+              $stmt->bind_result($klantid, $onderwerp, $bericht, $datum, $orderid);
               $stmt->fetch();
               $stmt->close();
 
@@ -147,22 +152,15 @@ if(!empty($_SESSION['login'])){
                 <div class="panel-body">
                     <p>Datum: <?php echo $datum ?></p>
                     <p>Email: <?php echo $email ?></p>
+                    <?php
+                    if(!empty($ordernummer)){
+                      echo "<p>Ordernummer: ".$ordernummer."</p>";
+                    }
+                    ?>
                     <hr></hr>
                     <p><b>Onderwerp: </b><?php echo $onderwerp ?></p>
                     <p><b>Bericht:</b></p>
                     <p><?php echo $bericht ?></p>
-                    <div class="filmDetail_right">
-                        <button type="submit" class="btn btn-success bestel" data-toggle="collapse" data-target="#<?php echo $i ?>">BEANTWOORD</button>
-                    </div>
-                    <br><br>
-                    <hr></hr>
-                    <div id="<?php echo $i ?>" class="collapse order_collapse">
-                      <form method="post" action="?action=reply&code=<?php echo $i?>">
-                        <input type="text" class="form-control" placeholder="reactie" name="reactie">
-                        <input type="hidden" value="<?php echo $naam ?>" name="naam">
-                        <input type="hidden" value="<?php echo $email ?>" name="email">
-                      </form>
-                    </div>
                 </div>
               </div>
 
@@ -190,10 +188,10 @@ if(!empty($_SESSION['login'])){
       <?php
       if(!empty($ids)){
           foreach($ids as $i){
-            $stmt = DB::conn()->prepare("SELECT klantid, onderwerp, bericht, datum FROM `Klacht` WHERE id=?");
+            $stmt = DB::conn()->prepare("SELECT klantid, onderwerp, bericht, datum, orderid FROM `Klacht` WHERE id=?");
             $stmt->bind_param('i', $i);
             $stmt->execute();
-            $stmt->bind_result($klantid, $onderwerp, $bericht, $datum);
+            $stmt->bind_result($klantid, $onderwerp, $bericht, $datum, $ordernummer);
             $stmt->fetch();
             $stmt->close();
 
@@ -218,6 +216,11 @@ if(!empty($_SESSION['login'])){
               <div class="panel-body">
                   <p>Datum: <?php echo $datum ?></p>
                   <p>Email: <?php echo $email ?></p>
+                  <?php
+                  if(!empty($ordernummer)){
+                    echo "<p>Ordernummer: ".$ordernummer."</p>";
+                  }
+                  ?>
                   <hr></hr>
                   <p><b>Onderwerp: </b><?php echo $onderwerp ?></p>
                   <p><b>Bericht:</b></p>
