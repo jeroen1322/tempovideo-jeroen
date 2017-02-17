@@ -24,11 +24,11 @@ if(!empty($_SESSION['login'])){
 
 $film = $this->filmNaam;
 //Pak de foto van de film
-$stmt = DB::conn()->prepare("SELECT id, titel, acteur, omschr, genre, img FROM Film WHERE id=?");
+$stmt = DB::conn()->prepare("SELECT id, titel, acteur, omschr, youtube, genre, img FROM Film WHERE id=?");
 $stmt->bind_param("s", $film);
 $stmt->execute();
 
-$stmt->bind_result($id, $titel, $acteur, $omschr, $genre, $img);
+$stmt->bind_result($id, $titel, $acteur, $omschr, $youtube, $genre, $img);
 $stmt->fetch();
 $stmt->close();
 
@@ -232,7 +232,8 @@ if(!empty($id)){
               }
               ?>
               <h3><b>Prijs</b></h3>
-              <p><b>€7,50</b></p>
+              <p><b>€7,50</b></p><br>
+              <p><b><a href="<?php echo $youtube ?>?vq=hd1080">YOUTUBE LINK</a></b></p>
                 <?php
                 if($klantRolId != 5){
                   if($dis){
