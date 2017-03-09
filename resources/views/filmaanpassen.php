@@ -40,6 +40,7 @@ if(!empty($_SESSION['login'])){
       $film_id[] = $id;
     }
     $stmt->close();
+
     if(!empty($id)){
       ?>
       <table class="table">
@@ -55,14 +56,29 @@ if(!empty($_SESSION['login'])){
       <?php
 
       foreach($film_id as $i){
-        $stmt = DB::conn()->prepare("SELECT id, titel, acteur, omschr, genre, img FROM `Film` WHERE id=?");
+        $stmt = DB::conn()->prepare("SELECT id, titel, omschr, img FROM `Film` WHERE id=?");
         $stmt->bind_param("i", $i);
         $stmt->execute();
-        $stmt->bind_result($id, $titel, $acteur, $omschr, $genre, $img);
+        $stmt->bind_result($id, $titel, $omschr, $img);
         $stmt->fetch();
         $stmt->close();
         $cover = "/cover/" . $img;
         $URL = "/film/" . $id;
+
+
+        $stmt = DB::conn()->prepare("SELECT genreid FROM TussenGenre WHERE filmid=?");
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $stmt->bind_result($genreid);
+        $stmt->fetch();
+        $stmt->close();
+
+        $stmt = DB::conn()->prepare("SELECT omschr FROM Genre WHERE genreid=?");
+        $stmt->bind_param('i', $genreid);
+        $stmt->execute();
+        $stmt->bind_result($genre);
+        $stmt->fetch();
+        $stmt->close();
 
         if($edit == true && $code == $id){
           ?>
@@ -74,6 +90,30 @@ if(!empty($_SESSION['login'])){
             </td>
             <td><input type="text" class="form-control" autocomplete="off" value="<?php echo $omschr ?>" name="omschr"></td>
             <td>
+            <select class="form-control" name="genre">
+              <?php
+              $stmt = DB::conn()->prepare("SELECT genreid FROM `Genre`");
+              $stmt->execute();
+              $stmt->bind_result($genreid);
+              while($stmt->fetch()){
+                $genres[] = $genreid;
+              }
+              $stmt->close();
+              foreach($genres as $g){
+                $stmt = DB::conn()->prepare("SELECT omschr FROM Genre WHERE genreid=?");
+                $stmt->bind_param('i', $g);
+                $stmt->execute();
+                $stmt->bind_result($genreOmschr);
+                $stmt->fetch();
+                $stmt->close();
+                ?>
+                <option value="<?php echo $g ?>"><?php echo $genreOmschr ?></option>
+                <?php
+              }
+              ?>
+            </select>
+            </td>
+            <td>
                 <button type="submit" class="btn btn-success">
                     <i class="fa fa-floppy-o" aria-hidden="true"></i>
                 </button>
@@ -81,33 +121,34 @@ if(!empty($_SESSION['login'])){
             </td>
           </tr>
           <?php
-
+            $gen = $_POST['genre'];
             $nieuweTitel = $_POST['titel'];
-            if(!empty($nieuweTitel)){
+            $nieuweOmschr = $_POST['omschr'];
+            if(!empty($_POST)){
               //Gegevens invoeren in Film tabel
               $stmt = DB::conn()->prepare("UPDATE `Film` SET `titel`=? WHERE id=?");
               $stmt->bind_param("ss", $nieuweTitel, $code);
               $stmt->execute();
               $stmt->close();
-              header("Refresh:0; url=/eigenaar/film_aanpassen");
-            }
-            $nieuweOmschr = $_POST['omschr'];
-            if(!empty($nieuweOmschr)){
               //Gegevens invoeren in Film tabel
               $stmt = DB::conn()->prepare("UPDATE `Film` SET `omschr`=? WHERE id=?");
               $stmt->bind_param("ss", $nieuweOmschr, $code);
               $stmt->execute();
               $stmt->close();
+
+              $stmt = DB::conn()->prepare("UPDATE TussenGenre SET genreid=? WHERE filmid=?");
+              $stmt->bind_param('ii', $gen, $code);
+              $stmt->execute();
+              $stmt->close();
               header("Refresh:0; url=/eigenaar/film_aanpassen");
             }
-
-
         }else{
         ?>
         <tr>
           <td><a href="<?php echo $URL ?>"><img src="<?php echo $cover ?>" class="winkelmand_img"></a></td>
           <td><?php echo $titel ?></td>
-          <td><?php echo $omschr ?><td>
+          <td><?php echo $omschr ?></td>
+          <td><?php echo $genre ?></td>
           <td>
             <form method="post" action="?action=edit&code=<?php echo $id ?>">
               <button type="submit" class="btn btn-success">

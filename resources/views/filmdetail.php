@@ -24,14 +24,33 @@ if(!empty($_SESSION['login'])){
 
 $film = $this->filmNaam;
 //Pak de foto van de film
-$stmt = DB::conn()->prepare("SELECT id, titel, acteur, omschr, youtube, genre, img FROM Film WHERE id=?");
+$stmt = DB::conn()->prepare("SELECT id, titel, acteur1, acteur2, acteur3, acteur4, acteur5, omschr, img FROM Film WHERE id=?");
 $stmt->bind_param("s", $film);
 $stmt->execute();
 
-$stmt->bind_result($id, $titel, $acteur, $omschr, $youtube, $genre, $img);
+$stmt->bind_result($id, $titel, $acteur1, $acteur2, $acteur3, $acteur4, $acteur5, $omschr, $img);
+while($stmt->fetch()){
+  $acteurs[] = $acteur1;
+  $acteurs[] = $acteur2;
+  $acteurs[] = $acteur3;
+  $acteurs[] = $acteur4;
+  $acteurs[] = $acteur5;
+}
+$stmt->close();
+
+$stmt = DB::conn()->prepare("SELECT genreid FROM TussenGenre WHERE filmid=?");
+$stmt->bind_param('i', $id);
+$stmt->execute();
+$stmt->bind_result($genreid);
 $stmt->fetch();
 $stmt->close();
 
+$stmt = DB::conn()->prepare("SELECT omschr FROM Genre WHERE genreid=?");
+$stmt->bind_param('i', $genreid);
+$stmt->execute();
+$stmt->bind_result($genre);
+$stmt->fetch();
+$stmt->close();
 
 $exm_stmt = DB::conn()->prepare("SELECT id FROM `Exemplaar` WHERE filmid=? AND statusid=1");
 $exm_stmt->bind_param("i", $id);
@@ -145,12 +164,23 @@ if(!empty($id)){
                     $nieuweTitel = $_POST['titel'];
                     $nieuweTitel = str_replace(' ', '_', $nieuweTitel);
                     $nieuweOmschr = $_POST['omschr'];
-                    $nieuweActeur = $_POST['acteur'];
+
+                    $nieuweActeur1 = $_POST['acteur1'];
+                    $nieuweActeur2 = $_POST['acteur2'];
+                    $nieuweActeur3 = $_POST['acteur3'];
+                    $nieuweActeur4 = $_POST['acteur4'];
+                    $nieuweActeur5 = $_POST['acteur5'];
+
                     $nieuweGenre = $_POST['genre'];
 
+                    $stmt = DB::conn()->prepare("UPDATE TussenGenre SET genreid=? WHERE filmid=?");
+                    $stmt->bind_param('ii', $nieuweGenre, $code);
+                    $stmt->execute();
+                    $stmt->close();
+
                     // //Gegevens invoeren in Film tabel
-                    $stmt = DB::conn()->prepare("UPDATE `Film` SET `titel`=?, `omschr`=?, `acteur`=?, `genre`=? WHERE id=?");
-                    $stmt->bind_param("sssss", $nieuweTitel, $nieuweOmschr, $nieuweActeur, $nieuweGenre, $code);
+                    $stmt = DB::conn()->prepare("UPDATE `Film` SET `titel`=?, `omschr`=?, `acteur1`=?, `acteur2`=?, `acteur3`=?, `acteur4`=?, `acteur5`=?  WHERE id=?");
+                    $stmt->bind_param("ssssssss", $nieuweTitel, $nieuweOmschr, $nieuweActeur1, $nieuweActeur2, $nieuweActeur3, $nieuweActeur4, $nieuweActeur5, $code);
                     $stmt->execute();
                     $stmt->close();
                     $reloadTitel = strtolower($nieuweTitel);
@@ -168,9 +198,34 @@ if(!empty($id)){
                     <h3>Omschrijving</h3>
                     <input type="text" class="form-control" autocomplete="off" value="<?php echo $omschr ?>" name="omschr">
                     <h3>Acteurs</h3>
-                    <input type="text" class="form-control" autocomplete="off" value="<?php echo $acteur ?>" name="acteur">
+                    <input type="text" class="form-control" autocomplete="off" value="<?php echo $acteur1 ?>" name="acteur1">
+                    <input type="text" class="form-control" autocomplete="off" value="<?php echo $acteur2 ?>" name="acteur2">
+                    <input type="text" class="form-control" autocomplete="off" value="<?php echo $acteur3 ?>" name="acteur3">
+                    <input type="text" class="form-control" autocomplete="off" value="<?php echo $acteur4 ?>" name="acteur4">
+                    <input type="text" class="form-control" autocomplete="off" value="<?php echo $acteur5 ?>" name="acteur5">
                     <h3>Genre</h3>
-                    <input type="text" class="form-control" autocomplete="off" value="<?php echo $genre ?>" name="genre">
+                    <select class="form-control" name="genre">
+                      <?php
+                      $stmt = DB::conn()->prepare("SELECT genreid FROM `Genre`");
+                      $stmt->execute();
+                      $stmt->bind_result($genreid);
+                      while($stmt->fetch()){
+                        $genres[] = $genreid;
+                      }
+                      $stmt->close();
+                      foreach($genres as $g){
+                        $stmt = DB::conn()->prepare("SELECT omschr FROM Genre WHERE genreid=?");
+                        $stmt->bind_param('i', $g);
+                        $stmt->execute();
+                        $stmt->bind_result($genreOmschr);
+                        $stmt->fetch();
+                        $stmt->close();
+                        ?>
+                        <option value="<?php echo $g ?>"><?php echo $genreOmschr ?></option>
+                        <?php
+                      }
+                      ?>
+                    </select>
                 </div>
                 <div class="filmDetail_right">
                     <button type="submit" class="btn btn-success">
@@ -202,9 +257,20 @@ if(!empty($id)){
               <h3>Omschrijving</h3>
               <p><?php echo $omschr ?></p>
               <h3>Acteurs</h3>
-              <p><?php echo $acteur ?></p>
+                <?php
+                $i = 0;
+                foreach($acteurs as $a){
+                  $i = $i + 1;
+                  if(!empty($a)){
+                    ?>
+                    <p><?php echo $i?> | <?php echo $a ?><p>
+                      <?php
+                  }
+                }
+                ?>
               <h3>Genre</h3>
               <p><?php echo $genre ?></p>
+              <br>
               <?php
               $dis = false;
               if($count >=4){
@@ -232,8 +298,7 @@ if(!empty($id)){
               }
               ?>
               <h3><b>Prijs</b></h3>
-              <p><b>€7,50</b></p><br>
-              <p><b><a href="<?php echo $youtube ?>?vq=hd1080">YOUTUBE LINK</a></b></p>
+              <p><b>€7,50</b></p>
                 <?php
                 if($klantRolId != 5){
                   if($dis){

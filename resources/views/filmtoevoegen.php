@@ -25,10 +25,38 @@ if(!empty($_SESSION['login'])){
         <h1>FILM TOEVOEGEN</h1>
         <form method="post" enctype="multipart/form-data">
           <input type="text" name="titel" placeholder="Titel" class="form-control" autocomplete="off" required>
-          <input type="text" name="acteur" placeholder="Acteurs" class="form-control" autocomplete="off" required>
+
+          <input type="text" name="acteur1" placeholder="Acteur" class="form-control" autocomplete="off" required>
+          <input type="text" name="acteur2" placeholder="Acteur" class="form-control" autocomplete="off">
+          <input type="text" name="acteur3" placeholder="Acteur" class="form-control" autocomplete="off">
+          <input type="text" name="acteur4" placeholder="Acteur" class="form-control" autocomplete="off">
+          <input type="text" name="acteur5" placeholder="Acteur" class="form-control" autocomplete="off">
+
           <input type="text" name="oms" placeholder="Omschrijving" class="form-control" autocomplete="off" required>
-          <input type="text" name="youtube" placeholder="YouTube video" class="form-control" autocomplete="off" required>
-          <input type="text" name="genre" placeholder="Genre" class="form-control" autocomplete="off" required>
+
+          <select class="form-control" name="genre">
+            <?php
+            $stmt = DB::conn()->prepare("SELECT genreid FROM `Genre`");
+            $stmt->execute();
+            $stmt->bind_result($genreid);
+            while($stmt->fetch()){
+              $genres[] = $genreid;
+            }
+            $stmt->close();
+            foreach($genres as $g){
+              $stmt = DB::conn()->prepare("SELECT omschr FROM Genre WHERE genreid=?");
+              $stmt->bind_param('i', $g);
+              $stmt->execute();
+              $stmt->bind_result($genreOmschr);
+              $stmt->fetch();
+              $stmt->close();
+              ?>
+              <option value="<?php echo $g ?>"><?php echo $genreOmschr ?></option>
+              <?php
+            }
+            ?>
+          </select>
+
           <input type="file" name="img" placeholder="FOTO" class="form-control" accept="image/*" required>
 
           <input type="submit" class="btn btn-succes form-knop" name="submit" value="VOEG TOE">
@@ -47,11 +75,17 @@ if(!empty($_SESSION['login'])){
 
   if(!empty($_POST)){
   $titel = $_POST['titel'];
-  $acteur = $_POST['acteur'];
+
+  $acteur1 = $_POST['acteur1'];
+  $acteur2 = $_POST['acteur2'];
+  $acteur3 = $_POST['acteur3'];
+  $acteur4 = $_POST['acteur4'];
+  $acteur5 = $_POST['acteur5'];
+
+
   $oms = $_POST['oms'];
   $genre = $_POST['genre'];
   $img = $_FILES['img'];
-  $youtube = $_POST['youtube'];
   $uploadName = $titel;
   $uploadName = str_replace(' ', '_', $uploadName);
   $uploadName = strtolower($uploadName);
@@ -110,13 +144,16 @@ if(!empty($_SESSION['login'])){
         $stmt->close();
         $filmid = $filmidlast + 1;
     }
-
+    print_r($genre);
     //Gegevens invoeren in Film tabel
-    $stmt = DB::conn()->prepare("INSERT INTO Film (id, titel, acteur, omschr, youtube, genre, img) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("issssss", $filmid, $uploadName, $acteur, $oms, $youtube, $genre, $name);
+    $stmt = DB::conn()->prepare("INSERT INTO Film (id, titel, acteur1, acteur2, acteur3, acteur4, acteur5, omschr,  img) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("issssssss", $filmid, $uploadName, $acteur1, $acteur2, $acteur3, $acteur4, $acteur5, $oms, $name);
     $stmt->execute();
+    $stmt->close();
 
-
+    $stmt = DB::conn()->prepare("INSERT INTO TussenGenre(filmid, genreid) VALUES (?, ?)");
+    $stmt->bind_param('ii', $filmid, $genre);
+    $stmt->execute();
     $stmt->close();
 
     //EXEMPLAAR

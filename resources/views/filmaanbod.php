@@ -115,10 +115,10 @@ if(!empty($_GET['action'])){
 <?php
 if(!empty($titel)){
       foreach($film_titel as $i){
-        $stmt = DB::conn()->prepare("SELECT id, titel, acteur, omschr, genre, img FROM `Film` where id=?");
+        $stmt = DB::conn()->prepare("SELECT id, titel, omschr, img FROM `Film` where id=?");
         $stmt->bind_param("i", $i);
         $stmt->execute();
-        $stmt->bind_result($id, $titel, $acteur, $omschr, $genre, $img);
+        $stmt->bind_result($id, $titel, $omschr, $img);
 
         $stmt->fetch();
         $stmt->close();

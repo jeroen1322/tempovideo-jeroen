@@ -75,9 +75,12 @@ REFERENCES Exemplaar(id);
 create table Film(
 id int primary key, 
 titel varchar(50), 
-acteur varchar(100), 
-omschr varchar(200),
-youtube varchar(255)
+acteur1 varchar(100),
+acteur2 varchar(100),
+acteur3 varchar(100),
+acteur4 varchar(100),
+acteur5 varchar(100),
+omschr varchar(200)
 );
 
 ALTER TABLE `Exemplaar`
@@ -102,18 +105,6 @@ REFERENCES Rol(id);
 create table Status(
 id int primary key, 
 omschr varchar(50)
-);
-
-create table `Klacht`(
-`id` INT auto_increment,
-`klantid` INT,
-`onderwerp` VARCHAR(255),
-`bericht` VARCHAR(255),
-`orderid` VARCHAR(25),
-`datum` VARCHAR(50),
-`status` INT,
-PRIMARY KEY(`id`),
-FOREIGN KEY (klantid) REFERENCES Persoon(`id`)
 );
 
 ALTER TABLE `Exemplaar`
@@ -146,12 +137,12 @@ references Persoon(id);
 
 -- SELECT * FROM `Rol`;
 -- SELECT * FROM `Wachtwoord`;
-SELECT * FROM `Order`;
-SELECT * FROM `Orderregel`;
-SELECT * FROM `Exemplaar`;
-SELECT * FROM `Film`;
-SELECT * FROM `Persoon`;
-SELECT * FROM `Reservering`;
+-- SELECT * FROM `Order`;
+-- SELECT * FROM `Orderregel`;
+-- SELECT * FROM `Exemplaar`;
+-- SELECT * FROM `Film`;
+-- SELECT * FROM `Persoon`;
+-- SELECT * FROM `Reservering`;
 
 
 INSERT INTO Wachtwoord(id, wachtwoord) VALUES (1, '$2y$10$GjFXmwAmtSTX5f7WR3IIpebLaNCCv0ehFZCE1lEttXhcYGgCp9EB.');
@@ -165,3 +156,64 @@ INSERT INTO Persoon (naam, adres, postcode, woonplaats, telefoonnummer, email, w
 
 INSERT INTO Wachtwoord(id, wachtwoord) VALUES (4, '$2y$10$GjFXmwAmtSTX5f7WR3IIpebLaNCCv0ehFZCE1lEttXhcYGgCp9EB.');
 INSERT INTO Persoon (naam, adres, postcode, woonplaats, telefoonnummer, email, wachtwoordid, active, rolid) VALUES ('Hans Odijk', 'columbuslaan 540', '3526 EP', 'Utrecht', '0302815100', 'klant@jeroengrooten.nl', 4, 1, 1);
+
+create table `Klacht`(
+`id` INT auto_increment,
+`klantid` INT,
+`onderwerp` VARCHAR(255),
+`bericht` VARCHAR(255),
+`orderid` VARCHAR(25),
+`datum` VARCHAR(50),
+`status` INT,
+PRIMARY KEY(`id`),
+FOREIGN KEY (klantid) REFERENCES Persoon(`id`)
+);
+
+create table TussenGenre(
+filmid int, 
+genreid int, 
+primary key (filmid, genreid)
+);
+SELECT * FROM TussenGenre;
+create table Genre(
+genreid int primary key, 
+omschr varchar(50)
+);
+
+alter table Film drop column Genre;
+alter table Film add column uploaddatum varchar(25);
+alter table TussenGenre
+add foreign key (filmid)
+references Film(id);
+
+alter table TussenGenre
+add foreign key (genreid)
+references Genre(genreid);
+
+
+insert into Genre values (1, "Actie");
+
+insert into Genre values (2, "Avontuur");
+
+insert into Genre values (3, "Drama");
+
+insert into Genre values (4, "Fantasy");
+insert into Genre values (5, "Gangster");
+insert into Genre values (6, "Historisch drama");
+insert into Genre values (7, "Horror");
+insert into Genre values (8, "Komedie");
+insert into Genre values (9, "Kostuumdrama");
+insert into Genre values (10, "Melodrama");
+insert into Genre values (11, "Misdaad");
+insert into Genre values (12, "Musical");
+insert into Genre values (13, "Oorlog");
+insert into Genre values (14, "Psychologische thriller");
+insert into Genre values (15, "Rampen");
+insert into Genre values (16, "Roadmovie");
+insert into Genre values (17, "Romantisch");
+insert into Genre values (18, "Romantische komedie");
+insert into Genre values (19, "Sciencefiction");
+insert into Genre values (20, "Sport");
+insert into Genre values (21, "Thriller");
+insert into Genre values (22, "Western");
+Select * From TussenGenre;
