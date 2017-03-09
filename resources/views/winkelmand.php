@@ -40,6 +40,7 @@ if(!empty($_SESSION['login'])){
     $bedr_stmt->bind_result($bedrag);
     $bedr_stmt->fetch();
     $bedr_stmt->close();
+
     //Haal exemplaarid van Orderregel dat bij de Order hoort op
     $or_stmt = DB::conn()->prepare("SELECT exemplaarid FROM `Orderregel` WHERE orderid=?");
     $or_stmt->bind_param("i", $order_id);
@@ -62,16 +63,16 @@ if(!empty($_SESSION['login'])){
       $exm_stmt->close();
 
       //Haal alles van de film op dat overeen komt met de filmid van het exemplaar
-      $exm_film_stmt = DB::conn()->prepare("SELECT id, titel, acteur, omschr, genre, img FROM `Film` WHERE id=?");
+      $exm_film_stmt = DB::conn()->prepare("SELECT id, titel, omschr, img FROM `Film` WHERE id=?");
       $exm_film_stmt->bind_param("i", $exm_film_id);
       $exm_film_stmt->execute();
 
-      $exm_film_stmt->bind_result($film_id, $titel, $acteur, $omschr, $genre, $img);
+      $exm_film_stmt->bind_result($film_id, $titel, $omschr, $img);
       $exm_film_stmt->fetch();
       $exm_film_stmt->close();
 
-
       if(!empty($film_id)){
+
         $cover = "/cover/" . $img;
         $URL = "/film/" . $film_id;
         $titel = strtoupper($titel);
