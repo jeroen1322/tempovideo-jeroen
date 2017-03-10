@@ -74,14 +74,14 @@ if(!empty($_SESSION['login'])){
     <div class="panel-body registreer-panel">
       <h1>REGISTREER</h1>
       <form method="post">
-        <input type="text" name="naam" placeholder="Naam" class="form-control" required>
-        <input type="text" name="adres" placeholder="Adres" class="form-control" required>
-        <input type="text" name="postcode" placeholder="Postcode" class="form-control"  required>
-        <input type="text" name="woonplaats" placeholder="Woonplaats" class="form-control"  required>
-        <input type="text" name="telefoonnummer" placeholder="Telefoonnummer" class="form-control"  required>
-        <input type="email" name="email" placeholder="Email" autocomplete="off" class="form-control"  required>
-        <input type="password" name="wachtwoord" placeholder="Wachtwoord" autocomplete="off" class="form-control"  required>
-        <input type="password" name="herhaalWachtwoord" placeholder="Herhaal wachtwoord" autocomplete="off" class="form-control"  required>
+        <input type="text" name="naam" placeholder="Naam" class="form-control" autocomplete="off" required>
+        <input type="text" name="adres" placeholder="Adres" class="form-control" autocomplete="off" required>
+        <input type="text" name="postcode" placeholder="Postcode" class="form-control" autocomplete="off" required>
+        <input type="text" name="woonplaats" placeholder="Woonplaats" class="form-control" autocomplete="off" required>
+        <input type="text" name="telefoonnummer" placeholder="Telefoonnummer" class="form-control" autocomplete="off" required>
+        <input type="email" name="email" placeholder="Email" autocomplete="off" class="form-control" autocomplete="off" required>
+        <input type="password" name="wachtwoord" placeholder="Wachtwoord" autocomplete="off" class="form-control" autocomplete="off" required>
+        <input type="password" name="herhaalWachtwoord" placeholder="Herhaal wachtwoord" autocomplete="off" class="form-control" autocomplete="off" required>
 
         <input type="submit" name="submit" class="btn btn-primary form-knop" value="REGISTREER">
       </form>
