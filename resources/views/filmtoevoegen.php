@@ -34,7 +34,8 @@ if(!empty($_SESSION['login'])){
 
           <input type="text" name="oms" placeholder="Omschrijving" class="form-control" autocomplete="off" required>
 
-          <select class="form-control" name="genre">
+
+          <select class="form-control" name="genretest[]" multiple="true">
             <?php
             $stmt = DB::conn()->prepare("SELECT genreid FROM `Genre`");
             $stmt->execute();
@@ -51,7 +52,7 @@ if(!empty($_SESSION['login'])){
               $stmt->fetch();
               $stmt->close();
               ?>
-              <option value="<?php echo $g ?>"><?php echo $genreOmschr ?></option>
+              <option value="<?php echo $g ?>" name="genre[]"><?php echo $genreOmschr ?></option>
               <?php
             }
             ?>
@@ -82,6 +83,7 @@ if(!empty($_SESSION['login'])){
   $acteur4 = $_POST['acteur4'];
   $acteur5 = $_POST['acteur5'];
 
+  $genres = $_POST['genretest'];
 
   $oms = $_POST['oms'];
   $genre = $_POST['genre'];
@@ -155,6 +157,13 @@ if(!empty($_SESSION['login'])){
     $stmt->bind_param('ii', $filmid, $genre);
     $stmt->execute();
     $stmt->close();
+
+    foreach($genres as $g){
+      $stmt = DB::conn()->prepare("insert into TussenGenre (filmid, genreid) values (?, ?)");
+      $stmt->bind_param("ii", $filmid, $g);
+      $stmt->execute();
+      $stmt->close();
+    }
 
     //EXEMPLAAR
     $ex_stmt = DB::conn()->prepare("SELECT id FROM Film WHERE titel=? and id=?");
