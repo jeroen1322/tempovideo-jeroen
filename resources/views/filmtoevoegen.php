@@ -33,31 +33,30 @@ if(!empty($_SESSION['login'])){
           <input type="text" name="acteur5" placeholder="Acteur" class="form-control" autocomplete="off">
 
           <input type="text" name="oms" placeholder="Omschrijving" class="form-control" autocomplete="off" required>
-
-
-          <select class="form-control" name="genretest[]" multiple="true">
-            <?php
-            $stmt = DB::conn()->prepare("SELECT genreid FROM `Genre`");
+          <div class="form-group">
+          <?php
+          $stmt = DB::conn()->prepare("SELECT genreid FROM `Genre`");
+          $stmt->execute();
+          $stmt->bind_result($genreid);
+          while($stmt->fetch()){
+            $genres[] = $genreid;
+          }
+          $stmt->close();
+          foreach($genres as $g){
+            $stmt = DB::conn()->prepare("SELECT omschr FROM Genre WHERE genreid=?");
+            $stmt->bind_param('i', $g);
             $stmt->execute();
-            $stmt->bind_result($genreid);
-            while($stmt->fetch()){
-              $genres[] = $genreid;
-            }
+            $stmt->bind_result($genreOmschr);
+            $stmt->fetch();
             $stmt->close();
-            foreach($genres as $g){
-              $stmt = DB::conn()->prepare("SELECT omschr FROM Genre WHERE genreid=?");
-              $stmt->bind_param('i', $g);
-              $stmt->execute();
-              $stmt->bind_result($genreOmschr);
-              $stmt->fetch();
-              $stmt->close();
-              ?>
-              <option value="<?php echo $g ?>" name="genre[]"><?php echo $genreOmschr ?></option>
-              <?php
-            }
             ?>
-          </select>
-
+            <label>
+              <input type='checkbox' class="form-group" name='checkbox[]' value="<?php echo $g ?>"><?php echo $genreOmschr ?><br>
+            </label>
+            <?php
+          }
+          ?>
+          </div>
           <input type="file" name="img" placeholder="FOTO" class="form-control" accept="image/*" required>
 
           <input type="submit" class="btn btn-succes form-knop" name="submit" value="VOEG TOE">
@@ -83,7 +82,7 @@ if(!empty($_SESSION['login'])){
   $acteur4 = $_POST['acteur4'];
   $acteur5 = $_POST['acteur5'];
 
-  $genres = $_POST['genretest'];
+  $genres = $_POST['checkbox'];
 
   $oms = $_POST['oms'];
   $genre = $_POST['genre'];
@@ -146,7 +145,7 @@ if(!empty($_SESSION['login'])){
         $stmt->close();
         $filmid = $filmidlast + 1;
     }
-    print_r($genre);
+
     //Gegevens invoeren in Film tabel
     $stmt = DB::conn()->prepare("INSERT INTO Film (id, titel, acteur1, acteur2, acteur3, acteur4, acteur5, omschr,  img) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("issssssss", $filmid, $uploadName, $acteur1, $acteur2, $acteur3, $acteur4, $acteur5, $oms, $name);
