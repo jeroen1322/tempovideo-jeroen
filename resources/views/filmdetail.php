@@ -180,13 +180,29 @@ if(!empty($id)){
 
                     $nieuweGenre = $_POST['genreCheckbox'];
 
+                    $stmt = DB::conn()->prepare("SELECT genreid FROM TussenGenre WHERE filmid=?");
+                    $stmt->bind_param('i', $id);
+                    $stmt->execute();
+                    $stmt->bind_result($filmGen);
+                    while($stmt->fetch()){
+                      $filmGens[] = $filmGen;
+                    }
+                    $stmt->close();
+
                     foreach($nieuweGenre as $n){
                       $stmt = DB::conn()->prepare("INSERT INTO TussenGenre(genreid, filmid) VALUES (?, ?)");
                       $stmt->bind_param('ii', $n, $id);
                       $stmt->execute();
                       $stmt->close();
                     }
-
+                    foreach($filmGens as $f){
+                      if(!in_array($f, $nieuweGenre)){
+                        $stmt = DB::conn()->prepare("DELETE FROM TussenGenre WHERE genreid=? AND filmid=?");
+                        $stmt->bind_param('ii', $f, $id);
+                        $stmt->execute();
+                        $stmt->close();
+                      }
+                    }
                     // //Gegevens invoeren in Film tabel
                     $stmt = DB::conn()->prepare("UPDATE `Film` SET `titel`=?, `omschr`=?, `acteur1`=?, `acteur2`=?, `acteur3`=?, `acteur4`=?, `acteur5`=?  WHERE id=?");
                     $stmt->bind_param("ssssssss", $nieuweTitel, $nieuweOmschr, $nieuweActeur1, $nieuweActeur2, $nieuweActeur3, $nieuweActeur4, $nieuweActeur5, $code);
