@@ -66,20 +66,6 @@ if(!empty($_SESSION['login'])){
         $URL = "/film/" . $id;
 
 
-        $stmt = DB::conn()->prepare("SELECT genreid FROM TussenGenre WHERE filmid=?");
-        $stmt->bind_param('i', $id);
-        $stmt->execute();
-        $stmt->bind_result($genreid);
-        $stmt->fetch();
-        $stmt->close();
-
-        $stmt = DB::conn()->prepare("SELECT omschr FROM Genre WHERE genreid=?");
-        $stmt->bind_param('i', $genreid);
-        $stmt->execute();
-        $stmt->bind_result($genre);
-        $stmt->fetch();
-        $stmt->close();
-
         if($edit == true && $code == $id){
           ?>
           <tr>
@@ -90,30 +76,6 @@ if(!empty($_SESSION['login'])){
             </td>
             <td><input type="text" class="form-control" autocomplete="off" value="<?php echo $omschr ?>" name="omschr"></td>
             <td>
-            <select class="form-control" name="genre">
-              <?php
-              $stmt = DB::conn()->prepare("SELECT genreid FROM `Genre`");
-              $stmt->execute();
-              $stmt->bind_result($genreid);
-              while($stmt->fetch()){
-                $genres[] = $genreid;
-              }
-              $stmt->close();
-              foreach($genres as $g){
-                $stmt = DB::conn()->prepare("SELECT omschr FROM Genre WHERE genreid=?");
-                $stmt->bind_param('i', $g);
-                $stmt->execute();
-                $stmt->bind_result($genreOmschr);
-                $stmt->fetch();
-                $stmt->close();
-                ?>
-                <option value="<?php echo $g ?>"><?php echo $genreOmschr ?></option>
-                <?php
-              }
-              ?>
-            </select>
-            </td>
-            <td>
                 <button type="submit" class="btn btn-success">
                     <i class="fa fa-floppy-o" aria-hidden="true"></i>
                 </button>
@@ -121,7 +83,6 @@ if(!empty($_SESSION['login'])){
             </td>
           </tr>
           <?php
-            $gen = $_POST['genre'];
             $nieuweTitel = $_POST['titel'];
             $nieuweOmschr = $_POST['omschr'];
             if(!empty($_POST)){
@@ -136,10 +97,6 @@ if(!empty($_SESSION['login'])){
               $stmt->execute();
               $stmt->close();
 
-              $stmt = DB::conn()->prepare("UPDATE TussenGenre SET genreid=? WHERE filmid=?");
-              $stmt->bind_param('ii', $gen, $code);
-              $stmt->execute();
-              $stmt->close();
               header("Refresh:0; url=/eigenaar/film_aanpassen");
             }
         }else{
@@ -148,7 +105,6 @@ if(!empty($_SESSION['login'])){
           <td><a href="<?php echo $URL ?>"><img src="<?php echo $cover ?>" class="winkelmand_img"></a></td>
           <td><?php echo $titel ?></td>
           <td><?php echo $omschr ?></td>
-          <td><?php echo $genre ?></td>
           <td>
             <form method="post" action="?action=edit&code=<?php echo $id ?>">
               <button type="submit" class="btn btn-success">
