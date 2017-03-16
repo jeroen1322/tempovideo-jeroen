@@ -83,9 +83,9 @@ if(!empty($_SESSION['login'])){
             </td>
           </tr>
           <?php
-            $nieuweTitel = $_POST['titel'];
-            $nieuweOmschr = $_POST['omschr'];
             if(!empty($_POST)){
+              $nieuweTitel = $_POST['titel'];
+              $nieuweOmschr = $_POST['omschr'];
               //Gegevens invoeren in Film tabel
               $stmt = DB::conn()->prepare("UPDATE `Film` SET `titel`=? WHERE id=?");
               $stmt->bind_param("ss", $nieuweTitel, $code);
