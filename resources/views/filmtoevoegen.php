@@ -50,7 +50,7 @@ if(!empty($_SESSION['login'])){
             $stmt->fetch();
             $stmt->close();
             ?>
-            <label>
+            <label class="col-md-3">
               <input type='checkbox' class="form-group" name='checkbox[]' value="<?php echo $g ?>"><?php echo $genreOmschr ?><br>
             </label>
             <?php
