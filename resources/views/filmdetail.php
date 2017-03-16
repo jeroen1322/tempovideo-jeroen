@@ -178,12 +178,14 @@ if(!empty($id)){
                     $nieuweActeur4 = $_POST['acteur4'];
                     $nieuweActeur5 = $_POST['acteur5'];
 
-                    $nieuweGenre = $_POST['genre'];
+                    $nieuweGenre = $_POST['genreCheckbox'];
 
-                    $stmt = DB::conn()->prepare("UPDATE TussenGenre SET genreid=? WHERE filmid=?");
-                    $stmt->bind_param('ii', $nieuweGenre, $code);
-                    $stmt->execute();
-                    $stmt->close();
+                    foreach($nieuweGenre as $n){
+                      $stmt = DB::conn()->prepare("INSERT INTO TussenGenre(genreid, filmid) VALUES (?, ?)");
+                      $stmt->bind_param('ii', $n, $id);
+                      $stmt->execute();
+                      $stmt->close();
+                    }
 
                     // //Gegevens invoeren in Film tabel
                     $stmt = DB::conn()->prepare("UPDATE `Film` SET `titel`=?, `omschr`=?, `acteur1`=?, `acteur2`=?, `acteur3`=?, `acteur4`=?, `acteur5`=?  WHERE id=?");
@@ -211,28 +213,39 @@ if(!empty($id)){
                     <input type="text" class="form-control" autocomplete="off" value="<?php echo $acteur4 ?>" name="acteur4">
                     <input type="text" class="form-control" autocomplete="off" value="<?php echo $acteur5 ?>" name="acteur5">
                     <h3>Genre</h3>
-                    <select class="form-control" name="genre">
                       <?php
                       $stmt = DB::conn()->prepare("SELECT genreid FROM `Genre`");
                       $stmt->execute();
                       $stmt->bind_result($genreid);
                       while($stmt->fetch()){
-                        $genres[] = $genreid;
+                        $Genres[] = $genreid;
                       }
                       $stmt->close();
-                      foreach($genres as $g){
+
+                      $stmt = DB::conn()->prepare("SELECT genreid FROM TussenGenre WHERE filmid=?");
+                      $stmt->bind_param('i', $id);
+                      $stmt->execute();
+                      $stmt->bind_result($filmGenre);
+                      while($stmt->fetch()){
+                        $filmGenres[] = $filmGenre;
+                      }
+                      $stmt->close();
+
+                      foreach($Genres as $g){
                         $stmt = DB::conn()->prepare("SELECT omschr FROM Genre WHERE genreid=?");
                         $stmt->bind_param('i', $g);
                         $stmt->execute();
                         $stmt->bind_result($genreOmschr);
                         $stmt->fetch();
                         $stmt->close();
+
                         ?>
-                        <option value="<?php echo $g ?>"><?php echo $genreOmschr ?></option>
+                        <label class="col-md-3">
+                          <input type='checkbox' class="form-group" name='genreCheckbox[]' value="<?php echo $g ?>" <?php if(in_array($g, $filmGenres)){ echo "checked"; }?> ><?php echo $genreOmschr ?><br>
+                        </label>
                         <?php
                       }
                       ?>
-                    </select>
                 </div>
                 <div class="filmDetail_right">
                     <button type="submit" class="btn btn-success">
