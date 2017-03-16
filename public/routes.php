@@ -109,11 +109,6 @@ $klein->respond('/registreer', function ($request, $response, $service) {
     $service->render(VIEWS.'/registreer.php');
 });
 
-$klein->respond('/baliemedewerker/bezorgdata', function ($request, $response, $service) {
-    $service->pageTitle = 'Bezorgdata';
-    $service->render(VIEWS.'/baliemedewerkerbezorgdata.php');
-});
-
 $klein->respond('/baliemedewerker/extraopties', function ($request, $response, $service) {
     $service->pageTitle = 'Extra opties';
     $service->render(VIEWS.'/baliemedewerkerextraopties.php');
