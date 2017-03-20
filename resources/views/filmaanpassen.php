@@ -64,7 +64,8 @@ if(!empty($_SESSION['login'])){
         $stmt->close();
         $cover = "/cover/" . $img;
         $URL = "/film/" . $id;
-
+        $titel = str_replace('_', ' ', $titel);
+        $titel = strtoupper($titel);
 
         if($edit == true && $code == $id){
           ?>

@@ -18,58 +18,32 @@ if(!empty($_SESSION['login'])){
     }
   }
   if(isKlant($klantRolId) || isMedewerker($klantRolId)){
-    $stmt = DB::conn()->prepare("SELECT id, naam, adres, postcode, woonplaats, telefoonnummer, email FROM `Persoon` WHERE id=?");
-    $stmt->bind_param('i', $klantId);
-    $stmt->execute();
-    $stmt->bind_result($id, $naam, $adres, $postcode, $woonplaats, $telefoonnummer, $email);
-    $stmt->fetch();
-    $stmt->close();
+    $afrekenen = new Afrekenen;
 
-    //Haal id op van Order op
-    $stmt = DB::conn()->prepare("SELECT id FROM `Order` WHERE klantid=? AND besteld=0");
-    $stmt->bind_param("i", $klantId);
-    $stmt->execute();
+    //Haal eerst alle klant gegevens op
+    $klantInfo = $afrekenen->getKlantInfo($klantId);
+    $id = $klantInfo['id'];
+    $naam = $klantInfo['naam'];
+    $adres = $klantInfo['adres'];
+    $postcode = $klantInfo['postcode'];
+    $woonplaats = $klantInfo['woonplaats'];
+    $telefoonnummer = $klantInfo['telefoonnummer'];
+    $email = $klantInfo['email'];
 
-    $stmt->bind_result($order_id);
+    //Haal het id van alle nog openstaande orders van de klant op
+    $returns = $afrekenen->getKlantOrders($klantId);
+    $order_id = $returns['order_id'];
+    $orderIdResult = $returns['orderIdResult'];
 
-    $orderIdResult = array();
-
-    while($stmt->fetch()){
-      $orderIdResult[] = $order_id;
-    }
-
-    $stmt->close();
-
-    $stmt = DB::conn()->prepare("SELECT id FROM `Order` WHERE klantid=? AND besteld=0");
-    $stmt->bind_param("i", $klantId);
-    $stmt->execute();
-    $stmt->bind_result($order_id);
-    $stmt->fetch();
-    $stmt->close();
-    $stmt = DB::conn()->prepare("select count(exemplaarid) from Orderregel where orderid =?;");
-    $stmt->bind_param("i", $order_id);
-    $stmt->execute();
-    $stmt->bind_result($count);
-    $stmt->fetch();
-    $stmt->close();
-
+    //Bereken het aantal openstaande order van de klant
+    $count = $afrekenen->countOrders($order_id);
 
     $bedrag = $count * 7.50;
-
-    $stmt = DB::conn()->prepare("SELECT id FROM `Order` WHERE klantid=? AND besteld=1");
-    $stmt->bind_param("i", $klantId);
-    $stmt->execute();
-    $stmt->bind_result($afgerond);
-    $alAfgerond = array();
-    while($stmt->fetch()){
-      $alAfgerond[] = $afgerond;
-    }
-    $stmt->close();
     ?>
     <div class="panel panel-default">
       <div class="panel-body">
     <?php
-    if(!empty($orderIdResult)){
+    if(!empty($order_id)){
       ?>
           <h1>AFREKENEN</h1>
           <?php
@@ -153,52 +127,40 @@ if(!empty($_SESSION['login'])){
               <a href="/"><button class="btn btn-success bestel">TERUG NAAR HOME</button></a>
               <?php
             }elseif($_GET['action'] == 'afleverDatum'){
-              $stmt = DB::conn()->prepare("SELECT ophaaldatum, ophaaltijd FROM `Order` WHERE besteld=1 AND klantid=?");
-              $stmt->bind_param('i', $klantId);
-              $stmt->execute();
-              $stmt->bind_result($OHdata, $OHtijd);
-              $data = array();
-              while($stmt->fetch()){
-                $data[] = $OHdata;
-              }
-              $stmt->close();
-              $nu = date("d-m-Y");
+              //Haal de ophaal data (datum en tijd) op van de order
+              //Dit wordt gedaan om te kijken of er
+              $data = $afrekenen->getOphaalData($klantId);
+              $OHdata = $data['OHdata'];
+              $OHtijd = $data['OHtijd'];
 
+              $nu = date("d-m-Y");
               $vandaag = strtotime("today");
               $date    = strtotime($OHdata);
-
+              $datum = date('d-m-Y', $date);
               $diff = $date - $vandaag;
               $days = floor($diff / (60*60*24) );
 
-              //$difference > 1 = toekomstige datum
+              //$diff > 1 = toekomstige datum
               //$difference > 0 = morgen
-              if(!empty($date)){
-
-                if($days > 0){
-                  ?>
-                  <div class="vraag">
-                    <h4><i>Op <?php
-                    $nlAflever = date('d F Y', strtotime($OHdata));
-                    echo strtolower(nlDate($nlAflever));
-                    ?>  om <?php echo $OHtijd ?> wordt er bij u een bestelling opgehaald. Wilt u deze bestelling dan laten bezorgen?</i></h4>
-                    <form method="post" action="?action=ophaalDatum&afleverDatum=<?php echo $OHdata ?>&afleverTijd=<?php echo $OHtijd?>">
-                      <button class="btn btn-primary bestel">JA</button>
-                    </form>
-
-                    <button class="btn btn-primary bestel nee">NEE</button>
-                  </div>
-                  <?php
-                }
+              if($days > 0){
                 ?>
-                <form method="post" class="afleverDatum" action="?action=afleverTijd">
-                <?php
-              }else{
-                ?>
-                <form method="post" action="?action=afleverTijd">
+                <div class="vraag">
+                  <h4><i>Op <?php
+                  $nlAflever = date('d F Y', strtotime($OHdata));
+                  echo strtolower(nlDate($nlAflever));
+                  ?>  om <?php echo $OHtijd ?> wordt er bij u een bestelling opgehaald. Wilt u deze bestelling dan laten bezorgen?</i></h4>
+                  <form method="post" action="?action=ophaalDatum&afleverDatum=<?php echo $OHdata ?>&afleverTijd=<?php echo $OHtijd?>">
+                    <button class="btn btn-primary bestel">JA</button>
+                  </form>
+
+                  <button class="btn btn-primary bestel nee">NEE</button>
+                </div>
                 <?php
               }
+
               ?>
-                <h2>AFLEVERDATUM</h2>
+              <h2>AFLEVERDATUM</h2>
+              <form method="post" action="?action=afleverTijd">
                 <select class="form-control" name="afleverDatum">
                   <?php
                   $ophaalDatum = date('d-m-Y');
@@ -217,27 +179,17 @@ if(!empty($_SESSION['login'])){
               </form>
               <?php
             }elseif($_GET['action'] == 'afleverTijd'){
+              //Pak het afleverdatum dat meegegeven is uit het formulier afleverDatum
               $afleverDatum = $_POST['afleverDatum'];
-              $stmt = DB::conn()->prepare("SELECT `aflevertijd` FROM `Order` WHERE afleverdatum=?");
-              $stmt->bind_param('s', $afleverDatum);
-              $stmt->execute();
-              $bezetteAfleverTijd = array();
-              $stmt->bind_result($f);
-              while($stmt->fetch()){
-                $bezetteAfleverTijd[] = $f;
-              }
-              $stmt->close();
-              $afleverDate = $_POST['afleverDatum'];
+              //Maak een array met alle af bezette aflevertijden op de datum van de afleverDatum
+              $bezetteAfleverTijd = $afrekenen->controlleerBezetteAfleverTijden($afleverDatum);
+
               foreach($orderIdResult as $e){
-                $stmt = DB::conn()->prepare("UPDATE `Order` SET afleverdatum=? WHERE id=?");
-                $stmt->bind_param("si", $afleverDate, $e);
-                $stmt->execute();
-                $stmt->close();
+                $afrekenen->updateAfleverdatum($afleverDatum, $e);
               }
               ?>
               <h4>Afleverdatum: <?php
               $nlAflever = date('d F Y', strtotime($_POST['afleverDatum']));
-              // echo $_POST['afleverDatum']
               echo strtolower(nlDate($nlAflever));
               ?></h4>
               <h2>AFLEVERTIJD</h2>
@@ -260,6 +212,8 @@ if(!empty($_SESSION['login'])){
               </form>
               <?php
             }elseif($_GET['action'] == 'ophaalDatum'){
+              //Als er in het begin op het dialoogvenster 'Ja' is geselecteerd,
+              //Springt de code direct hier naartoe en geeft de afleverTijd en afleverDatum mee via GET
               if(!empty($_POST)){
                 $afleverTijd = $_POST['afleverTijd'];
               }
@@ -267,10 +221,7 @@ if(!empty($_SESSION['login'])){
                 $afleverDatum = $_GET['afleverDatum'];
                 $afleverTijd = $_GET['afleverTijd'];
                 foreach($orderIdResult as $e){
-                  $stmt = DB::conn()->prepare("UPDATE `Order` SET afleverdatum=?, aflevertijd=? WHERE id=?");
-                  $stmt->bind_param("ssi", $afleverDatum, $afleverTijd, $e);
-                  $stmt->execute();
-                  $stmt->close();
+                  $afrekenen->updateAfleverDatumTijd($afleverDatum, $afleverTijd, $e);
                 }
               }else{
                 $afleverDatum = $_POST['afleverDatum'];
@@ -278,10 +229,7 @@ if(!empty($_SESSION['login'])){
               }
 
               foreach($orderIdResult as $e){
-                $stmt = DB::conn()->prepare("UPDATE `Order` SET aflevertijd=? WHERE id=?");
-                $stmt->bind_param("si", $afleverTijd, $e);
-                $stmt->execute();
-                $stmt->close();
+                $afrekenen->updateAfleverTijd($afleverTijd, $e);
               }
 
               ?>
@@ -316,44 +264,20 @@ if(!empty($_SESSION['login'])){
               </form>
               <?php
             }elseif($_GET['action'] == 'ophaalTijd'){
+              //Krijg de ophaalDatum van het vorige formulier via POST
               $ophaalDatum = $_POST['ophaalDatum'];
-              $stmt = DB::conn()->prepare("SELECT `ophaaltijd` FROM `Order` WHERE ophaaldatum=?");
-              $stmt->bind_param('s', $ophaalDatum);
-              $stmt->execute();
-              $bezetteOphaalTijd = array();
-              $stmt->bind_result($f);
-              while($stmt->fetch()){
-                $bezetteOphaalTijd[] = $f;
-              }
-              $stmt->close();
-
-              $exemplaren = array();
+              //Maak een array met alle alle tijden die al bezet zijn op de datum van de geselecteerde ophaalDatum
+              $bezetteOphaalTijd = $afrekenen->controlleerBezetteOphaalTijden($ophaalDatum);
 
               foreach($orderIdResult as $e){
-                $stmt = DB::conn()->prepare("UPDATE `Order` SET ophaaldatum=? WHERE id=?");
-                $stmt->bind_param("si", $ophaalDatum, $e);
-                $stmt->execute();
-                $stmt->close();
+                $afrekenen->updateOphaalDatum($ophaalDatum, $e);
 
-                $stmt = DB::conn()->prepare("SELECT exemplaarid FROM `Orderregel` WHERE orderid=?");
-                $stmt->bind_param('i', $e);
-                $stmt->execute();
-                $stmt->bind_result($exId);
-                $stmt->fetch();
-                $stmt->close();
+                $exId = $afrekenen->getExemplaarId($e);
 
-                $stmt = DB::conn()->prepare("SELECT id FROM `Exemplaar` WHERE id=? AND reservering=1");
-                $stmt->bind_param('i', $exId);
-                $stmt->execute();
-                $stmt->bind_result($id_exemplaar);
-                while($stmt->fetch()){
-                  $exemplaren[] = $id_exemplaar;
-                }
-                $stmt->close();
+                $exemplaren = $afrekenen->getGereserveerdeExemplaren($exId);
               }
-              // print_r($exemplaren);
-              $exs = count($exemplaren);
 
+              $exs = count($exemplaren);
               $korting = 7.5 * $exs;
 
               //Bereken het aantal dagen tussen de aflever en ophaal datum
@@ -437,24 +361,8 @@ if(!empty($_SESSION['login'])){
                   echo "<br><br><b>Totaal: €" . $totaal."</b>";
                 }
 
-
                 foreach($orderIdResult as $i){
-                  // $stmt = DB::conn()->prepare("SELECT bedrag FROM `Order` WHERE id=?");
-                  // $stmt->bind_param('i', $i);
-                  // $stmt->execute();
-                  // $stmt->bind_result($minBedrag);
-                  // $stmt->fetch();
-                  // $stmt->close();
-                  //
-                  // if(!empty($minBedrag)){
-                  //   $totaal = $totaal - $minBedrag;
-                  //   echo "TEST";
-                  // }
-
-                  $stmt = DB::conn()->prepare("UPDATE `Order` SET bedrag=? WHERE id=?");
-                  $stmt->bind_param('di', $totaal, $i);
-                  $stmt->execute();
-                  $stmt->close();
+                  $afrekenen->updateOrderTotaal($totaal, $i);
                 }
 
                 ?>

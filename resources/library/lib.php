@@ -81,3 +81,151 @@
 
       return $datum;
   }
+  class Afrekenen{
+    public function getKlantInfo($klantId){
+      $stmt = DB::conn()->prepare("SELECT id, naam, adres, postcode, woonplaats, telefoonnummer, email FROM `Persoon` WHERE id=?");
+      $stmt->bind_param('i', $klantId);
+      $stmt->execute();
+      $stmt->bind_result($id, $naam, $adres, $postcode, $woonplaats, $telefoonnummer, $email);
+      $stmt->fetch();
+      $stmt->close();
+
+      $klantInfoArray['id'] = $id;
+      $klantInfoArray['naam'] = $naam;
+      $klantInfoArray['adres'] = $adres;
+      $klantInfoArray['postcode'] = $postcode;
+      $klantInfoArray['woonplaats'] = $woonplaats;
+      $klantInfoArray['telefoonnummer'] = $telefoonnummer;
+      $klantInfoArray['email'] = $email;
+
+      return $klantInfoArray;
+    }
+
+    public function getKlantOrders($klantId){
+      $stmt = DB::conn()->prepare("SELECT id FROM `Order` WHERE klantid=? AND besteld=0");
+      $stmt->bind_param("i", $klantId);
+      $stmt->execute();
+      $stmt->bind_result($order_id);
+      $orderIdResult = array();
+      while($stmt->fetch()){
+        $orderIdResult[] = $order_id;
+      }
+      $stmt->close();
+      $returns['order_id'] = $order_id;
+      $returns['orderIdResult'] = $orderIdResult;
+      return $returns;
+    }
+
+    public function countOrders($order_id){
+      $stmt = DB::conn()->prepare("select count(exemplaarid) from Orderregel where orderid =?;");
+      $stmt->bind_param("i", $order_id);
+      $stmt->execute();
+      $stmt->bind_result($count);
+      $stmt->fetch();
+      $stmt->close();
+
+      return $count;
+    }
+
+    public function getOphaalData($klantId){
+      $stmt = DB::conn()->prepare("SELECT ophaaldatum, ophaaltijd FROM `Order` WHERE besteld=1 AND klantid=?");
+      $stmt->bind_param('i', $klantId);
+      $stmt->execute();
+      $stmt->bind_result($OHdata, $OHtijd);
+      $data = array();
+      while($stmt->fetch()){
+        $data['OHdata'] = $OHdata;
+        $data['OHtijd'] = $OHtijd;
+      }
+      $stmt->close();
+
+      return $data;
+    }
+
+    public function controlleerBezetteAfleverTijden($afleverDatum){
+      $stmt = DB::conn()->prepare("SELECT `aflevertijd` FROM `Order` WHERE afleverdatum=?");
+      $stmt->bind_param('s', $afleverDatum);
+      $stmt->execute();
+      $bezetteAfleverTijd = array();
+      $stmt->bind_result($f);
+      while($stmt->fetch()){
+        $bezetteAfleverTijd[] = $f;
+      }
+      $stmt->close();
+
+      return $bezetteAfleverTijd;
+    }
+
+    public function controlleerBezetteOphaalTijden($ophaalDatum){
+      $stmt = DB::conn()->prepare("SELECT `ophaaltijd` FROM `Order` WHERE ophaaldatum=?");
+      $stmt->bind_param('s', $ophaalDatum);
+      $stmt->execute();
+      $bezetteOphaalTijd = array();
+      $stmt->bind_result($f);
+      while($stmt->fetch()){
+        $bezetteOphaalTijd[] = $f;
+      }
+      $stmt->close();
+
+      return $bezetteOphaalTijd;
+    }
+
+    public function updateAfleverdatum($afleverDatum, $order){
+      $stmt = DB::conn()->prepare("UPDATE `Order` SET afleverdatum=? WHERE id=?");
+      $stmt->bind_param("si", $afleverDatum, $order);
+      $stmt->execute();
+      $stmt->close();
+    }
+
+    public function updateAfleverTijd($afleverTijd, $order){
+      $stmt = DB::conn()->prepare("UPDATE `Order` SET aflevertijd=? WHERE id=?");
+      $stmt->bind_param("si", $afleverTijd, $order);
+      $stmt->execute();
+      $stmt->close();
+    }
+
+    public function updateAfleverDatumTijd($afleverDatum, $afleverTijd, $order){
+      $stmt = DB::conn()->prepare("UPDATE `Order` SET afleverdatum=?, aflevertijd=? WHERE id=?");
+      $stmt->bind_param("ssi", $afleverDatum, $afleverTijd, $order);
+      $stmt->execute();
+      $stmt->close();
+    }
+
+    public function updateOphaalDatum($ophaalDatum, $order){
+      $stmt = DB::conn()->prepare("UPDATE `Order` SET ophaaldatum=? WHERE id=?");
+      $stmt->bind_param("si", $ophaalDatum, $order);
+      $stmt->execute();
+      $stmt->close();
+    }
+
+    public function getExemplaarId($order){
+      $stmt = DB::conn()->prepare("SELECT exemplaarid FROM `Orderregel` WHERE orderid=?");
+      $stmt->bind_param('i', $order);
+      $stmt->execute();
+      $stmt->bind_result($exemplaarId);
+      $stmt->fetch();
+      $stmt->close();
+
+      return $exemplaarId;
+    }
+
+    public function getGereserveerdeExemplaren($exemplaarId){
+      $stmt = DB::conn()->prepare("SELECT id FROM `Exemplaar` WHERE id=? AND reservering=1");
+      $stmt->bind_param('i', $exemplaarId);
+      $stmt->execute();
+      $stmt->bind_result($exemplaar);
+      while($stmt->fetch()){
+        $exemplaren[] = $exemplaar;
+      }
+      $stmt->close();
+
+      return $exemplaren;
+    }
+
+    public function updateOrderTotaal($bedrag, $order){
+      $stmt = DB::conn()->prepare("UPDATE `Order` SET bedrag=? WHERE id=?");
+      $stmt->bind_param('di', $bedrag, $order);
+      $stmt->execute();
+      $stmt->close();
+    }
+  }
