@@ -15,35 +15,34 @@ while($stmt->fetch()){
   $exemplaren[] = $exms;
 }
 $stmt->close();
-
-foreach($exemplaren as $e){
-  $stmt = DB::conn()->prepare("SELECT aantalVerhuur, filmid FROM Exemplaar WHERE id=?");
-  $stmt->bind_param('i', $e);
-  $stmt->execute();
-  $stmt->bind_result($aantalVerhuur, $filmid);
-  $stmt->fetch();
-  $stmt->close();
-
-  if($aantalVerhuur >= 30){
-    $stmt = DB::conn()->prepare("SELECT id FROM Exemplaar WHERe filmid=? AND statusid=1 AND aantalVerhuur<30");
-    $stmt->bind_param('i', $filmid);
+if(!empty($exemplaren)){
+  foreach($exemplaren as $e){
+    $stmt = DB::conn()->prepare("SELECT aantalVerhuur, filmid FROM Exemplaar WHERE id=?");
+    $stmt->bind_param('i', $e);
     $stmt->execute();
-    $stmt->bind_result($beschikbaarExemplaar);
+    $stmt->bind_result($aantalVerhuur, $filmid);
     $stmt->fetch();
     $stmt->close();
 
-    $stmt = DB::conn()->prepare("UPDATE `Orderregel` SET exemplaarid=? WHERE exemplaarid=?");
-    $stmt->bind_param('ii', $beschikbaarExemplaar, $e);
-    $stmt->execute();
-    $stmt->close();
+    if($aantalVerhuur >= 30){
+      $stmt = DB::conn()->prepare("SELECT id FROM Exemplaar WHERe filmid=? AND statusid=1 AND aantalVerhuur<30");
+      $stmt->bind_param('i', $filmid);
+      $stmt->execute();
+      $stmt->bind_result($beschikbaarExemplaar);
+      $stmt->fetch();
+      $stmt->close();
 
-    $stmt = DB::conn()->prepare("DELETE FROM `Exemplaar` WHERE id=?");
-    $stmt->bind_param("i", $e);
-    $stmt->execute();
-    $stmt->close();
+      $stmt = DB::conn()->prepare("UPDATE `Orderregel` SET exemplaarid=? WHERE exemplaarid=?");
+      $stmt->bind_param('ii', $beschikbaarExemplaar, $e);
+      $stmt->execute();
+      $stmt->close();
 
+      $stmt = DB::conn()->prepare("DELETE FROM `Exemplaar` WHERE id=?");
+      $stmt->bind_param("i", $e);
+      $stmt->execute();
+      $stmt->close();
+    }
   }
-
 }
 
 $vandaag = strtotime("today");
