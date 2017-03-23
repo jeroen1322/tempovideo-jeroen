@@ -116,14 +116,11 @@ PRIMARY KEY(`id`)
 CREATE TABLE tussenKorting(
 `idKorting` INT,
 `idPersoon` INT,
+`gebruikt` TINYINT,
 PRIMARY KEY(`idKorting`, `idPersoon`),
 FOREIGN KEY(`idKorting`) REFERENCES Korting(`id`),
 FOREIGN KEY(`idPersoon`) REFERENCES Persoon(`id`)
 );
-
-CREATE TABLE tussenKorting(
-`idKorting` INT,
-`idPersoon` INT,
 
 ALTER TABLE `Exemplaar`
 ADD FOREIGN KEY (statusid)
