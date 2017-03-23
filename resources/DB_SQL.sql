@@ -107,6 +107,24 @@ id int primary key,
 omschr varchar(50)
 );
 
+CREATE TABLE Korting(
+`id` INT,
+`bedrag` INT,
+PRIMARY KEY(`id`)
+);
+
+CREATE TABLE tussenKorting(
+`idKorting` INT,
+`idPersoon` INT,
+PRIMARY KEY(`idKorting`, `idPersoon`),
+FOREIGN KEY(`idKorting`) REFERENCES Korting(`id`),
+FOREIGN KEY(`idPersoon`) REFERENCES Persoon(`id`)
+);
+
+CREATE TABLE tussenKorting(
+`idKorting` INT,
+`idPersoon` INT,
+
 ALTER TABLE `Exemplaar`
 ADD FOREIGN KEY (statusid)
 REFERENCES Status(id);
