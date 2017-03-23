@@ -130,8 +130,10 @@ if(!empty($_SESSION['login'])){
               //Haal de ophaal data (datum en tijd) op van de order
               //Dit wordt gedaan om te kijken of er
               $data = $afrekenen->getOphaalData($klantId);
-              $OHdata = $data['OHdata'];
-              $OHtijd = $data['OHtijd'];
+              if(!empty($data)){
+                $OHdata = $data['OHdata'];
+                $OHtijd = $data['OHtijd'];
+              }
 
               $nu = date("d-m-Y");
               $vandaag = strtotime("today");
@@ -159,6 +161,7 @@ if(!empty($_SESSION['login'])){
               }
 
               ?>
+              <div class='afleverDatum'>
               <h2>AFLEVERDATUM</h2>
               <form method="post" action="?action=afleverTijd">
                 <select class="form-control" name="afleverDatum">
@@ -177,6 +180,7 @@ if(!empty($_SESSION['login'])){
                 </select>
                 <input type="submit" class="btn btn-success bestel" value="SELECTEER AFLEVERTIJD">
               </form>
+              </div>
               <?php
             }elseif($_GET['action'] == 'afleverTijd'){
               //Pak het afleverdatum dat meegegeven is uit het formulier afleverDatum

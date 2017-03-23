@@ -218,8 +218,9 @@
         $exemplaren[] = $exemplaar;
       }
       $stmt->close();
-
-      return $exemplaren;
+      if(!empty($exemplaren)){
+        return $exemplaren;
+      }
     }
 
     public function updateOrderTotaal($bedrag, $order){

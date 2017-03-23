@@ -32,7 +32,7 @@ if(!empty($_SESSION['login'])){
             $code = $_GET['code'];
             $action = $_GET['action'];
             $exm = $_GET['id'];
-            if($action == 'afgehandeld') {
+            if($action == 'extraBedrag') {
                 $afhandeling = 1;
 
                 $stmt = DB::conn()->prepare("UPDATE `Order` SET openbedrag = 5 WHERE id=?;");
@@ -44,68 +44,65 @@ if(!empty($_SESSION['login'])){
             }
 
         }
-            if(!empty($id)) {
+        if(!empty($id)) {
+            ?>
+            <div>
+              <table class="table">
+                <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Naam</th>
+                    <th>Woonplaats</th>
+                    <th>Datum ophalen</th>
+                    <th>Tijd</th>
+                    <th>Extra bedrag toevoegen</th>
+                </tr>
+                </thead>
+                <tbody>
+            </div>
+            <?php
+            foreach ($order_id as $i) {
+                $stmt = DB::conn()->prepare("SELECT exemplaarid FROM `Orderregel` WHERE orderid=?");
+                $stmt->bind_param('i', $i);
+                $stmt->execute();
+                $stmt->bind_result($exmid);
+                $stmt->fetch();
+                $stmt->close();
+
+                $stmt = DB::conn()->prepare("SELECT o.id, p.naam, p.adres, p.woonplaats, o.aflevertijd, o.ophaaltijd, o.afleverdatum, o.ophaaldatum FROM Persoon p, `Order` o where afhandeling = 0 and besteld  = 1 and o.id=?;");
+                $stmt->bind_param("i", $i);
+                $stmt->execute();
+                $stmt->bind_result($id, $naam, $adres, $woonplaats, $aflevertijd, $ophaaltijd, $afleverdatum, $ophaaldatum);
+                $stmt->fetch();
+                $stmt->close();
                 ?>
-
-                <div>
-                    <table class="table">
-                        <thead>
-                        <tr>
-                            <th>Id</th>
-                            <th>Naam</th>
-                            <th>Woonplaats</th>
-                            <th>Datum ophalen</th>
-                            <th>Tijd</th>
-                            <th>Extra bedrag toevoegen</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                </div>
-
+                <tr>
+                    <td><?php echo $id ?></td>
+                    <td><?php echo $naam ?></td>
+                    <td><?php echo $woonplaats ?></td>
+                    <td><?php echo $ophaaldatum ?></td>
+                    <td><?php echo $ophaaltijd ?></td>
+                    <td>
+                        <form method="post"
+                              action="?action=extraBedrag&code=<?php echo $i ?>&id=<?php echo $id ?>">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fa fa-credit-card"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
                 <?php
-                foreach ($order_id as $i) {
-                    $stmt = DB::conn()->prepare("SELECT exemplaarid FROM `Orderregel` WHERE orderid=?");
-                    $stmt->bind_param('i', $i);
-                    $stmt->execute();
-                    $stmt->bind_result($exmid);
-                    $stmt->fetch();
-                    $stmt->close();
-
-                    $stmt = DB::conn()->prepare("SELECT o.id, p.naam, p.adres, p.woonplaats, o.aflevertijd, o.ophaaltijd, o.afleverdatum, o.ophaaldatum FROM Persoon p, `Order` o where afhandeling = 0 and besteld  = 1 and o.id=?;");
-                    $stmt->bind_param("i", $i);
-                    $stmt->execute();
-                    $stmt->bind_result($id, $naam, $adres, $woonplaats, $aflevertijd, $ophaaltijd, $afleverdatum, $ophaaldatum);
-                    $stmt->fetch();
-                    $stmt->close();
-                    ?>
-                    <tr>
-                        <td><?php echo $id ?></td>
-                        <td><?php echo $naam ?></td>
-                        <td><?php echo $woonplaats ?></td>
-                        <td><?php echo $ophaaldatum ?></td>
-                        <td><?php echo $ophaaltijd ?></td>
-
-                        <td>
-                            <form method="post"
-                                  action="?action=afgehandeld&code=<?php echo $i ?>&id=<?php echo $id ?>">
-                                <button type="submit" class="btn btn-success">
-                                    <i class="fa fa-credit-card"></i>
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    <?php
-                }
             }
-            else{
-            // header("Refresh:0; url=/login");
-            echo "<div class='warning'><b>ER ZIJN GEEN OPEN BESTELLINGEN</b></div>";
-            } ?>
-            </table> </div>
-        </div>
+        }
+        else{
+          echo "<div class='warning'><b>ER ZIJN GEEN OPEN BESTELLINGEN</b></div>";
+        }
+        ?>
+        </table>
       </div>
-        <?php
-
+    </div>
+  </div>
+    <?php
 }else{
     header("Refresh:0; url=/login");
 }
