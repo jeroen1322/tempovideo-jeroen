@@ -61,30 +61,14 @@ if(!empty($_SESSION['login'])){
               $totaal = number_format($tot, 2);
 
               foreach($orderIdResult as $e){
-                $stmt = DB::conn()->prepare("UPDATE `Order` SET ophaaltijd=?, besteld=1, reminder=0 WHERE id=?");
-                $stmt->bind_param("si", $ophaalTijd, $e);
-                $stmt->execute();
-                $stmt->close();
+                $afrekenen->updateOphaalTijd($ophaalTijd, $e);
 
-                $stmt = DB::conn()->prepare("SELECT exemplaarid FROM `Orderregel` WHERE orderid=?");
-                $stmt->bind_param("i", $e);
-                $stmt->execute();
-                $stmt->bind_result($exm_id);
-                $stmt->fetch();
-                $stmt->close();
+                $exm_id = $afrekenen->getExemplaarId($e);
 
-                $stmt = DB::conn()->prepare("SELECT aantalVerhuur FROM `Exemplaar` WHERE id=?");
-                $stmt->bind_param("i", $exm_id);
-                $stmt->execute();
-                $stmt->bind_result($aantalVerhuur);
-                $stmt->fetch();
-                $stmt->close();
+                $aantalVerhuur = $afrekenen->getAantalVerhuur($e);
 
                 $nieuwAantalVerhuur = $aantalVerhuur + 1;
-                $stmt = DB::conn()->prepare("UPDATE `Exemplaar` SET aantalVerhuur=? WHERE id=?");
-                $stmt->bind_param('ii', $nieuwAantalVerhuur, $exm_id);
-                $stmt->execute();
-                $stmt->execute();
+                $afrekenen->updateAantalVerhuur($nieuwAantalVerhuur, $e);
               }
 
               ?>
