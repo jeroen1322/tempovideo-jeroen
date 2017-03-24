@@ -126,27 +126,7 @@ if(!empty($_SESSION['login'])){
               <h2><b>U HEEFT €<?php echo $totaal ?> BETAALD</b></h2>
               <a href="/"><button class="btn btn-success bestel">TERUG NAAR HOME</button></a>
               <?php
-            }elseif($_GET['action'] == 'korting'){
-              $krt = new Korting;
-              //TODO: Change to !empty
-              if(empty($krt->checkVoorKortingCode($klantId))){
-                ?>
-                <div class="kortingCode">
-                  <h4>Wilt u een kortingscode invoeren?</h4>
-                  <form method="post" action="?action=afleverDatum">
-                    <input type="text" placeholder="KORTINGS CODE" class="form-control" name="kortingsCode" required>
-                    <button class="btn btn-primary bestel">JA</button>
-                  </form>
-                  <a href="/winkelmand/afrekenen?action=afleverDatum"><button class="btn btn-primary bestel nee_korting">NEE</button></a>
-                </div>
-                <?php
-              }
             }elseif($_GET['action'] == 'afleverDatum'){
-              if(!empty($_POST['kortingsCode'])){
-                ?>
-                <input type="hidden" name="korting" value="<?php $_POST['kortingsCode']?>">
-                <?php
-              }
               //Haal de ophaal data (datum en tijd) op van de order
               //Dit wordt gedaan om te kijken of er
               $data = $afrekenen->getOphaalData($klantId);

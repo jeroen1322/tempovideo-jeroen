@@ -96,7 +96,8 @@ drop table Medewerker;
 rename table Klant to Persoon;
 
 ALTER TABLE Persoon
-ADD rolid int;
+ADD rolid int,
+ADD registreerDatum varchar(45);
 
 ALTER TABLE `Persoon`
 ADD FOREIGN KEY (rolid)
@@ -109,14 +110,18 @@ omschr varchar(50)
 
 CREATE TABLE Korting(
 `id` INT,
-`bedrag` INT,
+`code` VARCHAR(45),
+`gebruikt` INT,
 PRIMARY KEY(`id`)
 );
+
+INSERT INTO Korting(`id`, `code`, `gebruikt`) VALUES(1, 'ABC', 0);
+INSERT INTO Korting(`id`, `code`, `gebruikt`) VALUES(2, '123', 0);
+SELECT * FROM Korting;
 
 CREATE TABLE tussenKorting(
 `idKorting` INT,
 `idPersoon` INT,
-`gebruikt` TINYINT,
 PRIMARY KEY(`idKorting`, `idPersoon`),
 FOREIGN KEY(`idKorting`) REFERENCES Korting(`id`),
 FOREIGN KEY(`idPersoon`) REFERENCES Persoon(`id`)

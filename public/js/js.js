@@ -27,7 +27,7 @@ $(document).ready(function(){
       responsive: true
     });
   }
-  $('.afleverDatum').hide();
+  // $('.afleverDatum').hide();
   $('.nee').click(function(){
     $('.afleverDatum').show("fast");
     $('.vraag').hide("fast");

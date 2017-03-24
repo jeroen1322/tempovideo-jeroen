@@ -11,6 +11,7 @@ if(!empty($_POST)){
     $wachtwoord = $_POST['wachtwoord'];
     $herhaalWachtwoord = $_POST['herhaalWachtwoord'];
 
+
     $stmt = DB::conn()->prepare("SELECT email FROM `Persoon` WHERE email=?");
     $stmt->bind_param('s', $email);
     $stmt->execute();
@@ -46,21 +47,55 @@ if(!empty($_POST)){
         //RolId
         $rolid = 1;
         $active = 0;
+        $registreerDatum = date('d-m-Y');
         //Gegevens invoeren in Persoon tabel
-        $stmt = DB::conn()->prepare("INSERT INTO Persoon (naam, adres, postcode, woonplaats, telefoonnummer, email, wachtwoordid, active, rolid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssssiii", $naam, $adres, $postcode, $woonplaats, $telefoonnummer, $email, $id, $active, $rolid);
+        $stmt = DB::conn()->prepare("INSERT INTO Persoon (naam, adres, postcode, woonplaats, telefoonnummer, email, wachtwoordid, active, rolid, registreerDatum) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssssssiiis", $naam, $adres, $postcode, $woonplaats, $telefoonnummer, $email, $id, $active, $rolid, $registreerDatum);
         $stmt->execute();
+        $stmt->close();
+
+        if(!empty($_POST['kortingsCode'])){
+          $kortingsCode = $_POST['kortingsCode'];
+
+          $stmt =  DB::conn()->prepare('SELECT `id` FROM Korting WHERE `code`=? AND `gebruikt`=0');
+          $stmt->bind_param('i', $kortingsCode);
+          $stmt->execute();
+          $stmt->bind_result($kortingsId);
+          $stmt->fetch();
+          $stmt->close();
+
+
+          if(!empty($kortingsId)){
+
+            $stmt = DB::conn()->prepare('SELECT id FROM Persoon WHERE email=?');
+            $stmt->bind_param('s', $email);
+            $stmt->execute();
+            $stmt->bind_result($persoonId);
+            $stmt->fetch();
+            $stmt->close();
+
+            $stmt = DB::conn()->prepare('INSERT INTO tussenKorting(idKorting, idPersoon) VALUES(?, ?)');
+            $stmt->bind_param('is', $kortingsId, $persoonId);
+            $stmt->execute();
+            $stmt->close();
+
+            $stmt = DB::conn()->prepare('UPDATE `Korting` SET gebruikt=1 WHERE id=?');
+            $stmt->bind_param('i', $kortingsId);
+            $stmt->execute();
+            $stmt->close();
+
+            echo '<div class="succes">Uw proefperiode is met succes geregistreerd</div>';
+          }else{
+            echo '<div class="warning"><b>De kortingscode is niet geldig</b></div>';
+          }
+        }
 
         echo "<div class='succes'><b>ACCOUNT AANGEMAAKT. CONTROLLEER UW EMAIL OP EEN CONFIRMATIE EMAIL.</b></div>";
-
         confirmMail($naam, $email, $id);
-
-        // header("Refresh:0; url=/login");
       }
     }
 
-    //Connecties afsluiten
-    $stmt->close();
+
     DB::conn()->close();
   }else{
     echo "<div class='alert'>Controlleer of u alle informatie correct heeft ingevuld.</div>";
@@ -82,7 +117,7 @@ if(!empty($_SESSION['login'])){
         <input type="email" name="email" placeholder="Email" autocomplete="off" class="form-control" autocomplete="off" required>
         <input type="password" name="wachtwoord" placeholder="Wachtwoord" autocomplete="off" class="form-control" autocomplete="off" required>
         <input type="password" name="herhaalWachtwoord" placeholder="Herhaal wachtwoord" autocomplete="off" class="form-control" autocomplete="off" required>
-
+        <input type="text" name="kortingsCode" placeholder="Kortingscode" autocomplete="off" class="form-control">
         <input type="submit" name="submit" class="btn btn-primary form-knop" value="REGISTREER">
       </form>
     </div>
