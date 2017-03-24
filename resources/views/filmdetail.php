@@ -4,7 +4,13 @@
 if(!empty($_SESSION['login'])){
   $klantId = $_SESSION['login'][0];
   $klantNaam = $_SESSION['login'][1];
-  $klantRolId = $_SESSION['login'][2];
+
+  $stmt = DB::conn()->prepare("SELECT rolid FROM Persoon WHERE id=?");
+  $stmt->bind_param('i', $klantId);
+  $stmt->execute();
+  $stmt->bind_result($klantRolId);
+  $stmt->fetch();
+  $stmt->close();
   function isEigenaar($klantRolId){
     if($klantRolId === 4){
       return true;

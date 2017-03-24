@@ -74,8 +74,9 @@ if(!empty($_POST)){
             $stmt->fetch();
             $stmt->close();
 
-            $stmt = DB::conn()->prepare('INSERT INTO tussenKorting(idKorting, idPersoon) VALUES(?, ?)');
-            $stmt->bind_param('is', $kortingsId, $persoonId);
+            $verlengd = 0;
+            $stmt = DB::conn()->prepare('INSERT INTO tussenKorting(idKorting, idPersoon, verlengd) VALUES(?, ?, ?)');
+            $stmt->bind_param('isi', $kortingsId, $persoonId, $verlengd);
             $stmt->execute();
             $stmt->close();
 

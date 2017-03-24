@@ -1,4 +1,95 @@
 <?php
+if(!empty($_SESSION['login'])){
+  $klantId = $_SESSION['login'][0];
+  $klantNaam = $_SESSION['login'][1];
+  $klantRolId = $_SESSION['login'][2];
+}
+$stmt = DB::conn()->prepare('SELECT idPersoon FROM tussenKorting WHERE verlengd=0');
+$stmt->execute();
+$stmt->bind_result($idPersoon);
+while($stmt->fetch()){
+  $persoonKortingIds[] = $idPersoon;
+}
+$stmt->close();
+
+$vandaag = strtotime("today");
+
+if(!empty($persoonKortingIds)){
+  foreach($persoonKortingIds as $p){
+    $stmt = DB::conn()->prepare('SELECT registreerDatum FROM Persoon WHERE id=?');
+    $stmt->bind_param('i', $p);
+    $stmt->execute();
+    $stmt->bind_result($registreerDatum);
+    $stmt->fetch();
+    $stmt->close();
+
+    $stmt = DB::conn()->prepare('SELECT idKorting FROM tussenKorting WHERE idPersoon=?');
+    $stmt->bind_param('i', $p);
+    $stmt->execute();
+    $stmt->bind_result($idKorting);
+    $stmt->fetch();
+    $stmt->close();
+
+    if(!empty($idKorting)){
+      $regDatum = strtotime($registreerDatum);
+      $diff = $regDatum - $vandaag;
+      $days = floor($diff / (60*60*24) ); //Seconden naar dagen omrekenen
+
+      if($days <= -28){
+        $stmt = DB::conn()->prepare('UPDATE `Persoon` SET rolid=5 WHERE id=?');
+        $stmt->bind_param('i', $p);
+        $stmt->execute();
+        $stmt->close();
+
+        echo "<div class='warning opnieuwLid'><b>Uw proefperiode is afgelopen. Wilt U opnieuw lid worden?</b>
+        <form method='post' action='?action=hernieuw'>
+          <input type='submit' name='keuze' value='Ja' class='btn btn-primary bestel'>
+          <input type='submit' name='keuze' value='Nee' class='btn btn-primary bestel'>
+        </form>
+        </div>";
+      }
+    }
+  }
+}
+
+if(!empty($_GET)){
+  if($_GET['action'] == 'hernieuw'){
+    $keuze = $_POST['keuze'];
+    if($keuze === 'Ja'){
+      // welkomMail()
+      $verlengd = 1;
+      $stmt = DB::conn()->prepare("UPDATE `tussenKorting` SET verlengd=? WHERE idPersoon=?");
+      $stmt->bind_param('ii', $verlengd, $klantId);
+      $stmt->execute();
+      $stmt->close();
+      $stmt = DB::conn()->prepare("UPDATE `Persoon` SET rolid=? WHERE id=?");
+      $stmt->bind_param('ii', $verlengd, $klantId);
+      $stmt->execute();
+      $stmt->close();
+      header("Refresh:0; url=/");
+    }elseif($keuze === 'Nee'){
+      // helaasMail()
+
+      //TODO: delete from Order en tussenKorting
+      $stmt = DB::conn()->prepare("DELETE FROM `Order` WHERE klantid=?");
+      $stmt->bind_param("i", $klantId);
+      $stmt->execute();
+      $stmt->close();
+
+      $stmt = DB::conn()->prepare("DELETE FROM `tussenKorting` WHERE idPersoon=?");
+      $stmt->bind_param("i", $klantId);
+      $stmt->execute();
+      $stmt->close();
+
+      $stmt = DB::conn()->prepare("DELETE FROM `Persoon` WHERE id=?");
+      $stmt->bind_param("i", $klantId);
+      $stmt->execute();
+      $stmt->close();
+      header("Refresh:0; url=/uitloggen");
+    }
+  }
+}
+
 $stmt = DB::conn()->PREPARE("SELECT id FROM Film ORDER BY id DESC LIMIT 6");
 $stmt->execute();
 $stmt->bind_result($id);
@@ -44,8 +135,6 @@ if(!empty($exemplaren)){
     }
   }
 }
-
-$vandaag = strtotime("today");
 
 $stmt = DB::conn()->PREPARE("SELECT id FROM `Order` WHERE besteld=1 AND reminder=0");
 $stmt->execute();

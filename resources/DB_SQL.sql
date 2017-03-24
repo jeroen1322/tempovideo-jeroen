@@ -117,11 +117,12 @@ PRIMARY KEY(`id`)
 
 INSERT INTO Korting(`id`, `code`, `gebruikt`) VALUES(1, 'ABC', 0);
 INSERT INTO Korting(`id`, `code`, `gebruikt`) VALUES(2, '123', 0);
-SELECT * FROM Korting;
+INSERT INTO Korting(`id`, `code`, `gebruikt`) VALUES(3, '1A2B3C', 0);
 
 CREATE TABLE tussenKorting(
 `idKorting` INT,
 `idPersoon` INT,
+`verlengd` INT,
 PRIMARY KEY(`idKorting`, `idPersoon`),
 FOREIGN KEY(`idKorting`) REFERENCES Korting(`id`),
 FOREIGN KEY(`idPersoon`) REFERENCES Persoon(`id`)

@@ -4,7 +4,12 @@
 if(!empty($_SESSION['login'])){
     $klantId = $_SESSION['login'][0];
     $klantNaam = $_SESSION['login'][1];
-    $klantRolId = $_SESSION['login'][2];
+    $stmt = DB::conn()->prepare("SELECT rolid FROM Persoon WHERE id=?");
+    $stmt->bind_param('i', $klantId);
+    $stmt->execute();
+    $stmt->bind_result($klantRolId);
+    $stmt->fetch();
+    $stmt->close();
     function isEigenaar($klantRolId){
         if($klantRolId === 4){
             return true;
@@ -146,7 +151,7 @@ if(!empty($titel)){
                           <img src=<?php echo"$cover" ?> class="thumb_img filmaanbod_img"/></a>
                           <h2 class="textfilmaanbod"><?php echo "$titel"?> </h2>
                                 <?php
-                                  if(!empty($_SESSION["login"]) && $count != 0){
+                                  if(!empty($_SESSION["login"]) && $count != 0 && $dis == false){
                                       ?>
                                       <form method="post" action="?action=add&code=<?php echo $i ?>">
                                       <button type="submit" class="btn btn-success bestel filmaanbodbestel"><li class="fa fa-shopping-cart"></li></button>

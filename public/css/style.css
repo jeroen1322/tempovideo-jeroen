@@ -488,3 +488,8 @@ input {
     float: right;
     margin-top: -18px;
 }
+.opnieuwLid{
+  height: auto;
+  overflow: hidden;
+  padding-bottom: 0;
+}

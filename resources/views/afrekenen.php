@@ -98,7 +98,7 @@ if(!empty($_SESSION['login'])){
                 }
                 echo "<br><b>Totaal: €".$totaal."</b>";
                 if($krt){
-                  echo '<br><i>Leden Korting: 25%</i>';
+                  echo '<br><i>Proefperiode Korting: 25%</i>';
                 }
                 ?>
               </h4>
@@ -256,7 +256,7 @@ if(!empty($_SESSION['login'])){
               <?php
             }elseif($_GET['action'] == 'ophaalTijd'){
 
-              $stmt = DB::conn()->prepare("SELECT idKorting FROM tussenKorting WHERE idPersoon=?");
+              $stmt = DB::conn()->prepare("SELECT idKorting FROM tussenKorting WHERE idPersoon=? AND verlengd=0");
               $stmt->bind_param('i', $klantId);
               $stmt->execute();
               $stmt->bind_result($idKorting);
@@ -337,7 +337,7 @@ if(!empty($_SESSION['login'])){
                   $totaal = number_format($tot, 2);
                   echo "<br><b>Totaal: €" . $totaal."</b>";
                   if($krt){
-                    echo '<br><i>Leden Korting: 25%</i>';
+                    echo '<br><i>Proefperiode Korting: 25%</i>';
                   }
 
                 }elseif($days > 7){
