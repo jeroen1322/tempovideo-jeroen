@@ -100,6 +100,29 @@ class Afrekenen{
 
     return $klantInfoArray;
   }
+<<<<<<< Updated upstream
+=======
+
+  class Afrekenen{
+    public function getKlantInfo($klantId){
+      $stmt = DB::conn()->prepare("SELECT id, naam, adres, postcode, woonplaats, telefoonnummer, email FROM `Persoon` WHERE id=?");
+      $stmt->bind_param('i', $klantId);
+      $stmt->execute();
+      $stmt->bind_result($id, $naam, $adres, $postcode, $woonplaats, $telefoonnummer, $email);
+      $stmt->fetch();
+      $stmt->close();
+
+      $klantInfoArray['id'] = $id;
+      $klantInfoArray['naam'] = $naam;
+      $klantInfoArray['adres'] = $adres;
+      $klantInfoArray['postcode'] = $postcode;
+      $klantInfoArray['woonplaats'] = $woonplaats;
+      $klantInfoArray['telefoonnummer'] = $telefoonnummer;
+      $klantInfoArray['email'] = $email;
+
+      return $klantInfoArray;
+    }
+>>>>>>> Stashed changes
 
   public function getKlantOrders($klantId){
     $stmt = DB::conn()->prepare("SELECT id FROM `Order` WHERE klantid=? AND besteld=0");
@@ -177,12 +200,29 @@ class Afrekenen{
     $stmt->close();
   }
 
+<<<<<<< Updated upstream
   public function updateAfleverTijd($afleverTijd, $order){
     $stmt = DB::conn()->prepare("UPDATE `Order` SET aflevertijd=? WHERE id=?");
     $stmt->bind_param("si", $afleverTijd, $order);
     $stmt->execute();
     $stmt->close();
   }
+=======
+    public function updateOphaalTijd($ophaalTijd, $order){
+      $stmt = DB::conn()->prepare("UPDATE `Order` SET ophaaltijd=?, besteld=1, reminder=0 WHERE id=?");
+      $stmt->bind_param("si", $ophaalTijd, $order);
+      $stmt->execute();
+      $stmt->close();
+    }
+
+    public function getExemplaarId($order){
+      $stmt = DB::conn()->prepare("SELECT exemplaarid FROM `Orderregel` WHERE orderid=?");
+      $stmt->bind_param('i', $order);
+      $stmt->execute();
+      $stmt->bind_result($exemplaarId);
+      $stmt->fetch();
+      $stmt->close();
+>>>>>>> Stashed changes
 
   public function updateAfleverDatumTijd($afleverDatum, $afleverTijd, $order){
     $stmt = DB::conn()->prepare("UPDATE `Order` SET afleverdatum=?, aflevertijd=? WHERE id=?");
@@ -223,6 +263,7 @@ class Afrekenen{
     }
   }
 
+<<<<<<< Updated upstream
   public function updateOrderTotaal($bedrag, $order){
     $stmt = DB::conn()->prepare("UPDATE `Order` SET bedrag=? WHERE id=?");
     $stmt->bind_param('di', $bedrag, $order);
@@ -240,5 +281,31 @@ class Korting{
     $stmt->close();
 
     return $idKorting;
+=======
+    public function updateOrderTotaal($bedrag, $order){
+      $stmt = DB::conn()->prepare("UPDATE `Order` SET bedrag=? WHERE id=?");
+      $stmt->bind_param('di', $bedrag, $order);
+      $stmt->execute();
+      $stmt->close();
+    }
+
+    public function getAantalVerhuur($exemplaar){
+      $stmt = DB::conn()->prepare("SELECT aantalVerhuur FROM `Exemplaar` WHERE id=?");
+      $stmt->bind_param("i", $exemplaar);
+      $stmt->execute();
+      $stmt->bind_result($aantalVerhuur);
+      $stmt->fetch();
+      $stmt->close();
+
+      return $aantalVerhuur;
+    }
+
+    public function updateAantalVerhuur($nieuwAantalVerhuurd, $exemplaar){
+      $stmt = DB::conn()->prepare("UPDATE `Exemplaar` SET aantalVerhuur=? WHERE id=?");
+      $stmt->bind_param('ii', $nieuwAantalVerhuur, $exemplaar);
+      $stmt->execute();
+      $stmt->execute();
+    }
+>>>>>>> Stashed changes
   }
 }
