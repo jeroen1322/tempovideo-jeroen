@@ -127,6 +127,8 @@ FOREIGN KEY(`idKorting`) REFERENCES Korting(`id`),
 FOREIGN KEY(`idPersoon`) REFERENCES Persoon(`id`)
 );
 
+SELECT * FROM tussenKorting;
+
 ALTER TABLE `Exemplaar`
 ADD FOREIGN KEY (statusid)
 REFERENCES Status(id);

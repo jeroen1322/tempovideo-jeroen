@@ -84,7 +84,7 @@ if(!empty($_POST)){
             $stmt->execute();
             $stmt->close();
 
-            echo '<div class="succes">Uw proefperiode is met succes geregistreerd</div>';
+            echo '<div class="succes"><b>Uw proefperiode is met succes geregistreerd</b></div>';
           }else{
             echo '<div class="warning"><b>De kortingscode is niet geldig</b></div>';
           }

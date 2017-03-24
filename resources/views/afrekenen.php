@@ -59,6 +59,7 @@ if(!empty($_SESSION['login'])){
               $bezorgKosten = $_POST['bezorgKosten'];
               $tot = $_POST['totaal'];
               $totaal = number_format($tot, 2);
+              $krt = $_POST['korting'];
 
               foreach($orderIdResult as $e){
                 $afrekenen->updateOphaalTijd($ophaalTijd, $e);
@@ -66,7 +67,6 @@ if(!empty($_SESSION['login'])){
                 $exm_id = $afrekenen->getExemplaarId($e);
 
                 $aantalVerhuur = $afrekenen->getAantalVerhuur($e);
-
                 $nieuwAantalVerhuur = $aantalVerhuur + 1;
                 $afrekenen->updateAantalVerhuur($nieuwAantalVerhuur, $e);
               }
@@ -96,7 +96,10 @@ if(!empty($_SESSION['login'])){
                 }else{
                   echo "<br>Bezorgkosten: ". $bezorgKosten;
                 }
-                echo "<br><b>Totaal: €".$totaal."</b>"
+                echo "<br><b>Totaal: €".$totaal."</b>";
+                if($krt){
+                  echo '<br><i>Leden Korting: 25%</i>';
+                }
                 ?>
               </h4>
               <hr></hr>
@@ -252,6 +255,20 @@ if(!empty($_SESSION['login'])){
               </form>
               <?php
             }elseif($_GET['action'] == 'ophaalTijd'){
+
+              $stmt = DB::conn()->prepare("SELECT idKorting FROM tussenKorting WHERE idPersoon=?");
+              $stmt->bind_param('i', $klantId);
+              $stmt->execute();
+              $stmt->bind_result($idKorting);
+              $stmt->fetch();
+              $stmt->close();
+
+              if(!empty($idKorting)){
+                $krt = true;
+              }else{
+                $krt = false;
+              }
+
               //Krijg de ophaalDatum van het vorige formulier via POST
               $ophaalDatum = $_POST['ophaalDatum'];
               //Maak een array met alle alle tijden die al bezet zijn op de datum van de geselecteerde ophaalDatum
@@ -312,9 +329,16 @@ if(!empty($_SESSION['login'])){
 
                     echo "<br>Bezorgkosten: €2";
                   }
-                  $tot = $bezorg + $bedrag;
+                  if($krt){
+                    $tot = ($bezorg + $bedrag)*0.75;
+                  }else{
+                    $tot = $bezorg + $bedrag;
+                  }
                   $totaal = number_format($tot, 2);
                   echo "<br><b>Totaal: €" . $totaal."</b>";
+                  if($krt){
+                    echo '<br><i>Leden Korting: 25%</i>';
+                  }
 
                 }elseif($days > 7){
 
@@ -384,6 +408,7 @@ if(!empty($_SESSION['login'])){
                 <input type="hidden" value="<?php echo $_POST['afleverDatum']; ?>" name="afleverDatum">
                 <input type="hidden" value="<?php echo $_POST['afleverTijd']; ?>" name="aflvrTijd">
                 <input type="hidden" value="<?php echo $days ?>" name="huurPeriode">
+                <input type="hidden" value="<?php echo $krt ?>" name="korting">
                 <input type="submit" class="btn btn-success bestel" value="AFRONDEN">
               </form>
               <?php

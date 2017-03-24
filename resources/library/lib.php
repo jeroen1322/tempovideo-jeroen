@@ -229,6 +229,30 @@ class Afrekenen{
     $stmt->execute();
     $stmt->close();
   }
+
+  public function updateOphaalTijd($tijd, $order){
+    $stmt = DB::conn()->prepare("UPDATE `Order` SET ophaaltijd=?, besteld=1, reminder=0 WHERE id=?");
+    $stmt->bind_param("si", $tijd, $order);
+    $stmt->execute();
+    $stmt->close();
+  }
+  public function getAantalVerhuur($exemplaar){
+    $stmt = DB::conn()->prepare("SELECT aantalVerhuur FROM `Exemplaar` WHERE id=?");
+    $stmt->bind_param("i", $exemplaar);
+    $stmt->execute();
+    $stmt->bind_result($aantalVerhuur);
+    $stmt->fetch();
+    $stmt->close();
+
+    return $aantalVerhuur;
+  }
+
+  public function updateAantalVerhuur($nieuwAantal, $exemplaar){
+    $stmt = DB::conn()->prepare("UPDATE `Exemplaar` SET aantalVerhuur=? WHERE id=?");
+    $stmt->bind_param('ii', $nieuwAantal, $exemplaar);
+    $stmt->execute();
+    $stmt->execute();
+  }
 }
 
 class Korting{
