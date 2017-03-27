@@ -1,6 +1,70 @@
 <?php
 // require 'PHPMailerAutoload.php';
 
+function welkomMail($email){
+  $mail = new PHPMailer;
+
+  // $mail->SMTPDebug = 3;                               // Enable verbose debug output
+
+  $mail->isSMTP();                                      // Set mailer to use SMTP
+  $mail->Host = 'smtp.gmail.com';  // Specify main and backup SMTP servers
+  $mail->SMTPAuth = true;                               // Enable SMTP authentication
+  $mail->Username = 'mbotempovideo@gmail.com';                 // SMTP username
+  $mail->Password = 'JeroenSara7!';                           // SMTP password
+  $mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
+  $mail->Port = 587;                                    // TCP port to connect to
+
+  $mail->setFrom('noreply@tempovideo.nl', 'Tempovideo');
+  $mail->addAddress($email, 'Jeroen Grooten');     // Add a recipient
+
+  $mail->isHTML(true);                                  // Set email format to HTML
+
+  $mail->Subject = 'Welkom';
+  $mail->Body    = 'Geachte klant, <br><br>
+                    Wij zijn zeer blij dat u heeft gekozen om lid te blijven. Hopelijk zal TempoVideo aan al uw volwachtingen voldoen.
+                    <br><br><br>
+                    Hoogachtend,<br><br>
+                    Tempovideo';
+  $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
+
+  if(!$mail->send()) {
+      echo 'ERROR TIJDENS HET VERSTUREN VAN DE EMAIL <br>';
+      echo 'Mail Error: ' . $mail->ErrorInfo;
+  }
+}
+
+function helaasMail($email){
+  $mail = new PHPMailer;
+
+  // $mail->SMTPDebug = 3;                               // Enable verbose debug output
+
+  $mail->isSMTP();                                      // Set mailer to use SMTP
+  $mail->Host = 'smtp.gmail.com';  // Specify main and backup SMTP servers
+  $mail->SMTPAuth = true;                               // Enable SMTP authentication
+  $mail->Username = 'mbotempovideo@gmail.com';                 // SMTP username
+  $mail->Password = 'JeroenSara7!';                           // SMTP password
+  $mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
+  $mail->Port = 587;                                    // TCP port to connect to
+
+  $mail->setFrom('noreply@tempovideo.nl', 'Tempovideo');
+  $mail->addAddress($email, 'Jeroen Grooten');     // Add a recipient
+
+  $mail->isHTML(true);                                  // Set email format to HTML
+
+  $mail->Subject = 'TempoVideo vindt het jammer dat u gaat';
+  $mail->Body    = 'Geachte klant, <br><br>
+                    Wij bij TempoVideo vinden het zeer jammer dat u heeft besloten niet lid te blijven. Hopelijk komt u nog eens terug.
+                    <br><br><br>
+                    Hoogachtend,<br><br>
+                    Tempovideo';
+  $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
+
+  if(!$mail->send()) {
+      echo 'ERROR TIJDENS HET VERSTUREN VAN DE EMAIL <br>';
+      echo 'Mail Error: ' . $mail->ErrorInfo;
+  }
+}
+
 function blockMail($naam, $email){
   $mail = new PHPMailer;
 

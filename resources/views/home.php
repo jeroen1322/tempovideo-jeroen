@@ -52,11 +52,20 @@ if(!empty($persoonKortingIds)){
   }
 }
 
+
 if(!empty($_GET)){
+  $stmt = DB::conn()->prepare('SELECT email FROM Persoon WHERE id=?');
+  $stmt->bind_param('i', $klantId);
+  $stmt->execute();
+  $stmt->bind_result($email);
+  $stmt->fetch();
+  $stmt->close();
+
   if($_GET['action'] == 'hernieuw'){
     $keuze = $_POST['keuze'];
     if($keuze === 'Ja'){
-      // welkomMail()
+
+      welkomMail($email);
       $verlengd = 1;
       $stmt = DB::conn()->prepare("UPDATE `tussenKorting` SET verlengd=? WHERE idPersoon=?");
       $stmt->bind_param('ii', $verlengd, $klantId);
@@ -68,9 +77,8 @@ if(!empty($_GET)){
       $stmt->close();
       header("Refresh:0; url=/");
     }elseif($keuze === 'Nee'){
-      // helaasMail()
+      helaasMail($email);
 
-      //TODO: delete from Order en tussenKorting
       $stmt = DB::conn()->prepare("DELETE FROM `Order` WHERE klantid=?");
       $stmt->bind_param("i", $klantId);
       $stmt->execute();
